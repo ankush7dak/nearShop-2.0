@@ -1,0 +1,152 @@
+/* ============================
+   HAMBURGER ICON
+============================ */
+
+.hamburger-icon {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  width: 32px;
+  height: 24px;
+  cursor: pointer;
+  z-index: 1300;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  touch-action: manipulation;
+}
+
+.hamburger-icon span {
+  height: 3px;
+  background: #222;
+  border-radius: 4px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+/* Animate into X */
+
+.hamburger-icon.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger-icon.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-icon.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* ============================
+   BACKDROP
+============================ */
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1200;
+  backdrop-filter: blur(2px);
+}
+
+/* ============================
+   SIDE DRAWER PANEL
+============================ */
+
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  height: 100dvh;
+
+  width: min(82vw, 320px);
+  max-width: 360px;
+
+  background: #fff;
+
+  box-shadow: 6px 0 22px rgba(0, 0, 0, 0.18);
+
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  z-index: 1250;
+
+  padding-top: calc(env(safe-area-inset-top) + 72px);
+  padding-bottom: env(safe-area-inset-bottom);
+
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Open state */
+
+.menu-overlay.open {
+  transform: translateX(0);
+}
+
+/* ============================
+   MENU LIST
+============================ */
+
+.menu-overlay ul {
+  list-style: none;
+  padding: 0 20px;
+  margin: 0;
+}
+
+.menu-overlay li {
+  margin-bottom: 12px;
+}
+
+.menu-overlay a {
+  display: block;
+
+  text-decoration: none;
+
+  font-size: 16px;
+  font-weight: 500;
+
+  color: #222;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.menu-overlay a:hover {
+  background: #f2f4f7;
+}
+
+.menu-overlay a:active {
+  transform: scale(0.97);
+}
+
+/* ============================
+   TABLET
+============================ */
+
+@media (min-width: 768px) {
+  .menu-overlay {
+    width: min(45vw, 340px);
+  }
+}
+
+/* ============================
+   DESKTOP
+============================ */
+
+@media (min-width: 1200px) {
+  .menu-overlay {
+    width: 300px;
+  }
+
+  .hamburger-icon {
+    top: 22px;
+    left: 22px;
+  }
+}

@@ -1,0 +1,154 @@
+.nearshop-page {
+padding: 20px;
+    position: relative;
+    top: 20px;
+    width: 100vw;}
+
+.page-title {
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+
+/* SEARCH */
+.search-panel {
+ display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    position: sticky;
+    top: 11px;
+    left: 98px;
+    width: 80vw;
+}
+
+.search-input,
+.category-select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+/* GRID */
+.content-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 18px;
+}
+
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+        height: 505px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* CARD */
+
+.shop-card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: 0.25s;
+}
+
+.shop-card:hover {
+  transform: translateY(-3px);
+}
+
+.shop-card.active {
+  border: 2px solid #2563eb;
+}
+
+/* CONTENT */
+
+.shop-main h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.category {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+.distance {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* DIRECTION */
+
+.direction-btn {
+  background: #2563eb;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.direction-btn:hover {
+  background: #1e40af;
+  transform: scale(1.1);
+}
+
+/* MAP */
+
+.map-wrapper {
+  height: 75vh;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .map-wrapper {
+    height: 60vh;
+  }
+}
+
+/* ---------------- LEAFLET CRITICAL FIX ---------------- */
+
+.leaflet-container {
+  height: 100% !important;
+  width: 100%;
+  min-height: 400px;
+}
+
+/* Grid stretch fix */
+.content-grid > .map-wrapper {
+  min-height: 75vh;
+}
+
+/* Mobile fallback */
+@media (max-width: 900px) {
+  .content-grid > .map-wrapper {
+    min-height: 60vh;
+  }
+}
+

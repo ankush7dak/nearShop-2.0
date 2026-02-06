@@ -1,0 +1,190 @@
+/* PAGE */
+.nearshop-orders-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 26px 18px 60px;
+}
+
+.customer-orders-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100vw;
+  position: absolute;
+  top: 20px;
+}
+
+/* TOOLBAR */
+.orders-toolbar {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab {
+  border: none;
+  background: #f3f4f6;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tab.active {
+  background: #4f46e5;
+  color: white;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+}
+
+.filters input,
+.filters select {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+/* LIST */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* CARD */
+.order-card {
+  background: white;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* TOP */
+.order-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.order-top h4 {
+  font-size: 16px;
+}
+
+.order-date {
+  font-size: 12px;
+  color: #777;
+}
+
+/* STATUS */
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.delivered {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.active {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* MIDDLE */
+.order-middle {
+  margin: 12px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+/* BOTTOM */
+.order-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.price {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ACTIONS */
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn.primary {
+  background: #4f46e5;
+  color: white;
+}
+
+.btn.secondary {
+  background: #f3f4f6;
+}
+
+/* EMPTY */
+.empty-orders {
+  text-align: center;
+  padding: 60px 10px;
+  color: #666;
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+  .orders-toolbar {
+    flex-direction: column;
+  }
+
+  .tabs {
+    overflow-x: auto;
+  }
+
+  .order-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .order-bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .actions button {
+    flex: 1;
+  }
+}

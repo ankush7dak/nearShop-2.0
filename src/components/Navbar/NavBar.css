@@ -1,0 +1,269 @@
+/* =============================
+   ROOT VARIABLES
+============================= */
+
+:root {
+  --nav-height: 45px;
+  --nav-bg: #ffffff;
+  --nav-border: #e5e7eb;
+  --nav-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* =============================
+   MAIN NAVBAR
+============================= */
+
+.nearshop-navbar {
+  /* height: var(--nav-height); */
+      height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: clamp(12px, 4vw, 28px);
+    background: var(--nav-bg);
+    border: 1px solid var(--nav-border);
+    box-shadow: var(--nav-shadow);
+    border-radius: 999px;
+    max-width: 1174px;
+    width: calc(100% - 32px);
+    margin: 12px auto;
+    position: absolute;
+    top: env(safe-area-inset-top, 12px);
+    z-index: 400;
+    backdrop-filter: saturate(180%) blur(6px);
+    top: 4px;
+    right: 51px;
+}
+/* =============================
+   LEFT
+============================= */
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo {
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 700;
+  color: #111827;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* =============================
+   CENTER SEARCH
+============================= */
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+
+  min-width: 0;
+  padding-inline: clamp(8px, 2vw, 20px);
+}
+
+/* =============================
+   RIGHT ACTIONS
+============================= */
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 22px);
+}
+
+/* Cart */
+
+.navbar-cart {
+  font-size: clamp(18px, 3vw, 22px);
+  position: relative;
+  text-decoration: none;
+}
+
+.cart-badge {
+  position: absolute;
+  inset-block-start: -6px;
+  inset-inline-end: -8px;
+
+  background: #ef4444;
+  color: white;
+
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* =============================
+   PROFILE
+============================= */
+
+.navbar-profile {
+  position: relative;
+  cursor: pointer;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  background: #2563eb;
+  color: white;
+  font-size: 13px;
+
+  width: 32px;
+  height: 32px;
+
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+}
+
+.name {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.chevron {
+  font-size: 12px;
+}
+
+/* =============================
+   DROPDOWN
+============================= */
+
+.profile-dropdown {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 10px);
+
+  width: min(88vw, 240px);
+
+  background: white;
+
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+
+  padding: 10px;
+
+  display: flex;
+  flex-direction: column;
+
+  z-index: 900;
+
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Dropdown links */
+
+.profile-dropdown a {
+  padding: 10px 14px;
+
+  border-radius: 8px;
+
+  text-decoration: none;
+
+  color: #111827;
+  font-size: 14px;
+}
+
+.profile-dropdown a:hover {
+  background: #f3f4f6;
+}
+
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 6px 0;
+}
+
+.logout {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* =============================
+   TABLET
+============================= */
+
+@media (max-width: 1024px) {
+  :root {
+    --nav-height: 64px;
+  }
+
+  .navbar-center {
+    padding-inline: 8px;
+  }
+}
+
+/* =============================
+   MOBILE
+============================= */
+
+@media (max-width: 768px) {
+  .nearshop-navbar {
+    border-radius: 18px;
+    margin: 8px;
+  }
+
+  .navbar-center {
+    display: none;
+  }
+
+  .name {
+    display: none;
+  }
+}
+
+/* =============================
+   SMALL PHONES
+============================= */
+
+@media (max-width: 420px) {
+  :root {
+    --nav-height: 58px;
+  }
+
+  .chevron {
+    display: none;
+  }
+}
+
+@media (max-width: 1399px) {
+  .nearshop-navbar{
+    width: 765px;
+  }
+}
+@media (max-width: 975px) {
+    .nearshop-navbar {
+        width: 471px;
+        right: 94px;
+    }
+}
+@media (max-width: 963px) {
+    .nearshop-navbar {
+                width: 424px;
+        right: 72px;
+    }
+}
+@media (max-width: 659px) {
+    .nearshop-navbar {
+                        width: 341px;
+        right: 72px;
+    }
+}
+
+@media (max-width: 539px) {
+    .nearshop-navbar {
+      width: 271px;
+        right: 35px;
+    }
+}
