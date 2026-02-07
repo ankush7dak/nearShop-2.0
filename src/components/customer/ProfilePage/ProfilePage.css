@@ -216,3 +216,85 @@
     max-width: 1300px;
   }
 }
+
+/* ================= PASSWORD MODAL ================= */
+
+.password-btn {
+  margin-top: 12px;
+  background: #111827;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.password-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.password-modal {
+  background: white;
+  padding: 26px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+
+.password-modal h3 {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+/* Tabs */
+
+.password-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.password-tabs button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  border: none;
+  cursor: pointer;
+}
+
+.password-tabs .active {
+  background: #111827;
+  color: white;
+}
+
+/* Inputs */
+
+.password-modal input {
+  width: 100%;
+  padding: 11px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Actions */
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel-btn {
+  background: #e5e7eb;
+}
+

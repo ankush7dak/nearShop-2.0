@@ -13,6 +13,7 @@ import CustomerHome from './pages/customer/CustomerHome';
 import ProfilePage from './components/customer/ProfilePage/ProfilePage';
 import MyOrders from './components/customer/MyOrders/MyOrders';
 import NearShopSearchPage from './components/customer/NearByShopSearchPage/NearShopSearchPage';
+import NotificationsPage from './components/customer/NotificationsPage/NotificationsPage';
 // TEMP: only for testing
 
 
@@ -42,6 +43,13 @@ function App() {
             <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
               <HamburgerMenu></HamburgerMenu>
               <MyOrders></MyOrders>
+            </ProtectedRoute>
+          }
+        />
+        <Route  path="/customer/notifications" element={
+            <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+              <HamburgerMenu></HamburgerMenu>
+              <NotificationsPage></NotificationsPage>
             </ProtectedRoute>
           }
         />

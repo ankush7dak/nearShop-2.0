@@ -16,6 +16,18 @@ export default function ProfilePage() {
 
   const [isEditing, setIsEditing] = useState(false);
 
+  /* ----------------- PASSWORD MODAL STATE ----------------- */
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordMode, setPasswordMode] = useState("OLD");
+
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+    otp: ""
+  });
+
   const handleChange = (e) => {
     setProfile({
       ...profile,
@@ -25,10 +37,27 @@ export default function ProfilePage() {
 
   const handleSave = () => {
     console.log("Saved Profile:", profile);
-
-    // API call will go here later
-
     setIsEditing(false);
+  };
+
+  /* ----------------- PASSWORD HANDLERS ----------------- */
+
+  const handlePasswordInput = (e) => {
+    setPasswordData({
+      ...passwordData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleChangePassword = () => {
+    console.log("Password change mode:", passwordMode);
+    console.log(passwordData);
+
+    // 🔥 API CALL HERE:
+    // /change-password-with-old
+    // /change-password-with-otp
+
+    setShowPasswordModal(false);
   };
 
   return (
@@ -37,6 +66,7 @@ export default function ProfilePage() {
 
       <div className="nearshop-profile-page">
         <div className="profile-card">
+
           {/* Avatar */}
           <div className="avatar-section">
             <img src="https://i.pravatar.cc/150" alt="profile" />
@@ -47,40 +77,36 @@ export default function ProfilePage() {
             >
               Change Photo
             </button>
+
+            {/* CHANGE PASSWORD BUTTON */}
+            <button
+              className="password-btn"
+              onClick={() => setShowPasswordModal(true)}
+            >
+              Change Password
+            </button>
           </div>
 
           {/* Info */}
           <div className="profile-form">
-            {/* Full Name */}
-            <div className="form-group">
-              <label>Full Name</label>
-              <input
-                name="name"
-                value={profile.name}
-                onChange={handleChange}
-                disabled={!isEditing}
-              />
-            </div>
+
+            {/* Fields remain same */}
+            {["name","phone","city","state","pincode"].map((field) => (
+              <div className="form-group" key={field}>
+                <label>{field.toUpperCase()}</label>
+                <input
+                  name={field}
+                  value={profile[field]}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                />
+              </div>
+            ))}
 
             {/* Email */}
             <div className="form-group">
               <label>Email</label>
-              <input
-                name="email"
-                value={profile.email}
-                disabled
-              />
-            </div>
-
-            {/* Phone */}
-            <div className="form-group">
-              <label>Phone</label>
-              <input
-                name="phone"
-                value={profile.phone}
-                onChange={handleChange}
-                disabled={!isEditing}
-              />
+              <input value={profile.email} disabled />
             </div>
 
             {/* Gender */}
@@ -110,39 +136,6 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* City */}
-            <div className="form-group">
-              <label>City</label>
-              <input
-                name="city"
-                value={profile.city}
-                onChange={handleChange}
-                disabled={!isEditing}
-              />
-            </div>
-
-            {/* State */}
-            <div className="form-group">
-              <label>State</label>
-              <input
-                name="state"
-                value={profile.state}
-                onChange={handleChange}
-                disabled={!isEditing}
-              />
-            </div>
-
-            {/* Pincode */}
-            <div className="form-group">
-              <label>Pincode</label>
-              <input
-                name="pincode"
-                value={profile.pincode}
-                onChange={handleChange}
-                disabled={!isEditing}
-              />
-            </div>
-
             {/* Address */}
             <div className="form-group full">
               <label>Address</label>
@@ -154,25 +147,115 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* ACTION BUTTON */}
             {!isEditing ? (
-              <button
-                className="save-btn"
-                onClick={() => setIsEditing(true)}
-              >
+              <button className="save-btn" onClick={() => setIsEditing(true)}>
                 Edit Profile
               </button>
             ) : (
-              <button
-                className="save-btn"
-                onClick={handleSave}
-              >
+              <button className="save-btn" onClick={handleSave}>
                 Save Changes
               </button>
             )}
+
           </div>
         </div>
       </div>
+
+      {/* ================= PASSWORD POPUP ================= */}
+
+      {showPasswordModal && (
+        <div className="password-modal-overlay">
+
+          <div className="password-modal">
+
+            <h3>Change Password</h3>
+
+            {/* MODE SWITCH */}
+            <div className="password-tabs">
+
+              <button
+                className={passwordMode === "OLD" ? "active" : ""}
+                onClick={() => setPasswordMode("OLD")}
+              >
+                Using Old Password
+              </button>
+
+              <button
+                className={passwordMode === "OTP" ? "active" : ""}
+                onClick={() => setPasswordMode("OTP")}
+              >
+                Using OTP
+              </button>
+
+            </div>
+
+            {/* OLD PASSWORD FORM */}
+            {passwordMode === "OLD" && (
+              <>
+                <input
+                  type="password"
+                  placeholder="Old Password"
+                  name="oldPassword"
+                  onChange={handlePasswordInput}
+                />
+
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  name="newPassword"
+                  onChange={handlePasswordInput}
+                />
+
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  name="confirmPassword"
+                  onChange={handlePasswordInput}
+                />
+              </>
+            )}
+
+            {/* OTP FORM */}
+            {passwordMode === "OTP" && (
+              <>
+                <input
+                  placeholder="Enter OTP"
+                  name="otp"
+                  onChange={handlePasswordInput}
+                />
+
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  name="newPassword"
+                  onChange={handlePasswordInput}
+                />
+              </>
+            )}
+
+            {/* ACTIONS */}
+            <div className="modal-actions">
+
+              <button
+                className="cancel-btn"
+                onClick={() => setShowPasswordModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="save-btn"
+                onClick={handleChangePassword}
+              >
+                Update Password
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

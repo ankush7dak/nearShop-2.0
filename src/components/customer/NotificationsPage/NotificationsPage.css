@@ -1,0 +1,184 @@
+.nearshop-notifications-page {
+  max-width: 900px;
+  margin: auto;
+  padding: 24px;
+}
+
+.notification-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    position: absolute;
+    top: 30px;
+}
+
+/* HEADER */
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.notifications-header h2 {
+  font-size: 28px;
+}
+
+.notifications-header p {
+  color: gray;
+  font-size: 14px;
+}
+
+.notifications-header button {
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+/* TABS */
+
+.notification-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.notification-tabs button {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: #f3f4f6;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.notification-tabs .active {
+  background: #111827;
+  color: white;
+}
+
+/* LIST */
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* CARD */
+
+.notification-card {
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notification-card.unread {
+  border-left: 5px solid #111827;
+  background: #f9fafb;
+}
+
+/* LEFT */
+
+.notification-left {
+  display: flex;
+  gap: 14px;
+}
+
+.notification-left h4 {
+  margin: 0;
+}
+
+.notification-left p {
+  margin: 3px 0;
+  color: #4b5563;
+}
+
+.notification-left small {
+  color: gray;
+}
+
+/* BADGES */
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: capitalize;
+  height: fit-content;
+}
+
+.badge.orders {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge.offers {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge.system {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* ACTIONS */
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+.notification-actions button {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #e5e7eb;
+}
+
+.notification-actions .danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* EMPTY */
+
+.empty-state {
+  text-align: center;
+  padding: 50px;
+  color: gray;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+  .notifications-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .notification-card {
+    flex-direction: column;
+  }
+
+  .notification-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+}

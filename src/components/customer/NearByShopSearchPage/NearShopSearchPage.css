@@ -152,3 +152,49 @@ padding: 20px;
   }
 }
 
+/* ---------- NAV CONTROL ---------- */
+
+.nav-control {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  z-index: 999;
+}
+
+.nav-start-btn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+}
+
+.nav-start-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.nav-start-btn:hover {
+  background: #15803d;
+  transform: scale(1.05);
+}
+
+/* ETA BOX */
+
+.eta-box {
+  position: absolute;
+  bottom: 75px;
+  left: 18px;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  z-index: 999;
+}

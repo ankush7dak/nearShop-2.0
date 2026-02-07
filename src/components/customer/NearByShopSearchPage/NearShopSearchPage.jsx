@@ -10,7 +10,11 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { FaDirections, FaStar } from "react-icons/fa";
+import {
+  FaDirections,
+  FaStar,
+  FaPlaneDeparture,
+} from "react-icons/fa";
 import "./NearShopSearchPage.css";
 
 /* ---------------- LEAFLET ICON FIX ---------------- */
@@ -32,7 +36,7 @@ const SHOPS = [
     name: "Fresh Mart",
     category: "Grocery",
     lat: 24.7969,
-    lng: 85.0039,
+    lng: 88.0039,
     rating: 4.5,
   },
   {
@@ -48,7 +52,7 @@ const SHOPS = [
     name: "Tech Hub",
     category: "Electronics",
     lat: 24.7915,
-    lng: 85.0201,
+    lng: 80.0201,
     rating: 4.7,
   },
 ];
@@ -100,6 +104,40 @@ function ResizeFix() {
   return null;
 }
 
+/* ---------------- FIT ROUTE TO VIEW ---------------- */
+
+function FitRouteBounds({ route }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (route.length) {
+      const bounds = L.latLngBounds(route);
+      map.fitBounds(bounds, {
+        padding: [60, 60],
+        animate: true,
+      });
+    }
+  }, [route, map]);
+
+  return null;
+}
+
+/* ---------------- NAV BUTTON ---------------- */
+
+function StartNavigationBtn({ onStart, disabled }) {
+  return (
+    <div className="nav-control">
+      <button
+        onClick={onStart}
+        disabled={disabled}
+        className="nav-start-btn"
+      >
+        <FaPlaneDeparture /> Start
+      </button>
+    </div>
+  );
+}
+
 /* ---------------- MAIN COMPONENT ---------------- */
 
 export default function NearShopSearchPage() {
@@ -109,6 +147,8 @@ export default function NearShopSearchPage() {
   const [filtered, setFiltered] = useState(SHOPS);
   const [selectedShop, setSelectedShop] = useState(null);
   const [routeCoords, setRouteCoords] = useState([]);
+  const [eta, setEta] = useState(null);
+  const [navigating, setNavigating] = useState(false);
 
   /* ---------- GEO LOCATION ---------- */
 
@@ -154,7 +194,7 @@ export default function NearShopSearchPage() {
   /* ---------- ROUTING ---------- */
 
   const fetchRoute = async (shop) => {
-    if (!userLocation) return;
+    if (!userLocation || !shop) return;
 
     const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${shop.lng},${shop.lat}?overview=full&geometries=geojson`;
 
@@ -162,18 +202,25 @@ export default function NearShopSearchPage() {
     const data = await res.json();
 
     if (data.routes?.length) {
-      const coords = data.routes[0].geometry.coordinates.map(
+      const route = data.routes[0];
+
+      const coords = route.geometry.coordinates.map(
         ([lng, lat]) => [lat, lng]
       );
 
       setRouteCoords(coords);
       setSelectedShop(shop);
+      setNavigating(true);
+
+      const mins = Math.round(route.duration / 60);
+      setEta(mins);
     }
   };
 
   return (
-  <>
-  <div className="search-panel">
+    <>
+      {/* SEARCH */}
+      <div className="search-panel">
         <input
           className="search-input"
           placeholder="Search shop name..."
@@ -191,90 +238,103 @@ export default function NearShopSearchPage() {
           ))}
         </select>
       </div>
-    <div className="nearshop-page">
-      <h1 className="page-title">Find Nearby Shops</h1>
 
-      {/* SEARCH BAR */}
-      
+      <div className="nearshop-page">
+        <h1 className="page-title">Find Nearby Shops</h1>
 
-      <div className="content-grid">
-        {/* SHOP LIST */}
-        <div className="shop-list">
-          {filtered.map((shop) => (
-            <div
-              key={shop.id}
-              className={`shop-card ${
-                selectedShop?.id === shop.id ? "active" : ""
-              }`}
-            >
+        <div className="content-grid">
+          {/* SHOP LIST */}
+          <div className="shop-list">
+            {filtered.map((shop) => (
               <div
-                className="shop-main"
-                onClick={() => setSelectedShop(shop)}
+                key={shop.id}
+                className={`shop-card ${
+                  selectedShop?.id === shop.id ? "active" : ""
+                }`}
               >
-                <h3>{shop.name}</h3>
-                <p className="category">{shop.category}</p>
+                <div
+                  className="shop-main"
+                  onClick={() => setSelectedShop(shop)}
+                >
+                  <h3>{shop.name}</h3>
+                  <p className="category">{shop.category}</p>
 
-                <div className="rating">
-                  <FaStar /> {shop.rating}
+                  <div className="rating">
+                    <FaStar /> {shop.rating}
+                  </div>
+
+                  {shop.distance && (
+                    <p className="distance">{shop.distance} km away</p>
+                  )}
                 </div>
 
-                {shop.distance && (
-                  <p className="distance">{shop.distance} km away</p>
-                )}
+                <button
+                  className="direction-btn"
+                  onClick={() => fetchRoute(shop)}
+                >
+                  <FaDirections />
+                </button>
               </div>
+            ))}
+          </div>
 
-              <button
-                className="direction-btn"
-                onClick={() => fetchRoute(shop)}
+          {/* MAP */}
+          <div className="map-wrapper">
+            {userLocation && (
+              <MapContainer
+                center={[userLocation.lat, userLocation.lng]}
+                zoom={14}
+                className="map leaflet-container"
               >
-                <FaDirections />
-              </button>
-            </div>
-          ))}
-        </div>
+                <ResizeFix />
 
-        {/* MAP */}
-        <div className="map-wrapper">
-          {userLocation && (
-            <MapContainer
-              center={[userLocation.lat, userLocation.lng]}
-              zoom={14}
-              className="map leaflet-container"
-            >
-              <ResizeFix />
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-              <FlyToShop shop={selectedShop} />
+                <FlyToShop shop={selectedShop} />
+                <FitRouteBounds route={routeCoords} />
 
-              {/* USER */}
-              <Marker position={[userLocation.lat, userLocation.lng]}>
-                <Popup>You are here</Popup>
-              </Marker>
-
-              {/* SHOPS */}
-              {filtered.map((shop) => (
-                <Marker key={shop.id} position={[shop.lat, shop.lng]}>
-                  <Popup>
-                    <strong>{shop.name}</strong>
-                    <br />
-                    {shop.category}
-                    <br />
-                    ⭐ {shop.rating}
-                    <br />
-                    {shop.distance && `${shop.distance} km away`}
-                  </Popup>
+                {/* USER */}
+                <Marker position={[userLocation.lat, userLocation.lng]}>
+                  <Popup>You are here</Popup>
                 </Marker>
-              ))}
 
-              {/* ROUTE */}
-              {routeCoords.length > 0 && (
-                <Polyline positions={routeCoords} />
-              )}
-            </MapContainer>
-          )}
+                {/* SHOPS */}
+                {filtered.map((shop) => (
+                  <Marker key={shop.id} position={[shop.lat, shop.lng]}>
+                    <Popup>
+                      <strong>{shop.name}</strong>
+                      <br />
+                      {shop.category}
+                      <br />
+                      ⭐ {shop.rating}
+                      <br />
+                      {shop.distance && `${shop.distance} km away`}
+                    </Popup>
+                  </Marker>
+                ))}
+
+                {/* ROUTE */}
+                {routeCoords.length > 0 && (
+                  <Polyline positions={routeCoords} />
+                )}
+
+                {/* START BUTTON */}
+                <StartNavigationBtn
+                  disabled={!selectedShop}
+                  onStart={() => fetchRoute(selectedShop)}
+                />
+
+                {/* ETA */}
+                {eta && navigating && (
+                  <div className="eta-box">
+                    ⏱ {eta} min to {selectedShop?.name}
+                  </div>
+                )}
+              </MapContainer>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
