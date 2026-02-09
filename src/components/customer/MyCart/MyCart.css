@@ -1,0 +1,165 @@
+.cart-page {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+
+.my-cart-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+}
+
+/* ITEMS */
+
+.cart-items {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.cart-info h4 {
+  font-size: 15px;
+}
+
+.stock-text {
+  color: green;
+  font-size: 12px;
+}
+
+.cart-qty {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.cart-qty button {
+  width: 30px;
+  border: none;
+  background: #f3f4f6;
+}
+
+.cart-qty span {
+  padding: 0 10px;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* SUMMARY */
+
+.cart-summary {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  height: fit-content;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.summary-row.green {
+  color: green;
+}
+
+.summary-row.total {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.coupon-box {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.coupon-box input {
+  flex: 1;
+  padding: 8px;
+}
+
+.pay-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+}
+
+/* PAYMENT MODAL */
+
+.payment-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.payment-modal {
+  background: white;
+  padding: 24px;
+  width: 320px;
+  border-radius: 16px;
+}
+
+.payment-method {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.confirm-pay {
+  width: 100%;
+  background: green;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+.close-btn {
+  width: 100%;
+  margin-top: 8px;
+  background: #eee;
+  padding: 8px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .cart-page {
+    grid-template-columns: 1fr;
+  }
+}

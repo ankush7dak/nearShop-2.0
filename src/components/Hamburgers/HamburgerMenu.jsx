@@ -10,9 +10,13 @@ const HamburgerMenu = () => {
   const menuItems = {
     customer: [
       { name: "Home", path: HOME_BY_ROLE.customer },
-      { name: "Profile", path: "/customer/profile" },
-      { name: "Nearby Shops", path: "/customer/nearby-shops" },
+      // { name: "Nearby Shops", path: "/customer/nearby-shops" },
+      { name: "Visited Shops", path: "/customer/visited-shops" },
       { name: "My Orders", path: "/customer/orders" },
+      { name: "My Cart", path: "/customer/cart" },
+      { name: "My Profile", path: "/customer/profile" },
+
+
       // { name: "Profile Management", path: "/profile-management" },
       { name: "Notifications", path: "/customer/notifications" },
       { name: "Logout", path: "/login" },
