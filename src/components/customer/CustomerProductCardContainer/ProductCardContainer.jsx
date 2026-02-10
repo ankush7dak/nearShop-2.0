@@ -51,18 +51,18 @@ const products = [
 ];
 
 
-const ProductCardContainer = () => {
+const ProductCardContainer = ({data}) => {
   if (!products || products.length === 0) {
     return <p className="no-products">No products available.</p>;
   }
 
   return (
     <div className="card-container">
-      <div className="product-card-container">
+      {data && <div className="product-card-container">
         {products.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}
-      </div>
+      </div>}
     </div>
 
   );

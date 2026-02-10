@@ -1,269 +1,151 @@
-/* =============================
-   ROOT VARIABLES
-============================= */
-
-:root {
-  --nav-height: 45px;
-  --nav-bg: #ffffff;
-  --nav-border: #e5e7eb;
-  --nav-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-}
-
-/* =============================
-   MAIN NAVBAR
-============================= */
-
-.nearshop-navbar {
-  /* height: var(--nav-height); */
-      height: 72px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-inline: clamp(12px, 4vw, 28px);
-    background: var(--nav-bg);
-    border: 1px solid var(--nav-border);
-    box-shadow: var(--nav-shadow);
-    border-radius: 999px;
-    max-width: 1174px;
-    width: calc(100% - 32px);
-    margin: 12px auto;
+.navbar {
+      top: 0px;
+    left: 0px;
+    width: 100vw;
+    z-index: 1000;
+    background: white;
     position: absolute;
-    top: env(safe-area-inset-top, 12px);
-    z-index: 400;
-    backdrop-filter: saturate(180%) blur(6px);
-    top: 4px;
-    right: 51px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-/* =============================
-   LEFT
-============================= */
 
+/* INNER FLEX */
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 20px;
+  width: 100%;
+}
+
+/* LEFT */
 .navbar-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.navbar-logo {
-  font-size: clamp(18px, 2vw, 22px);
+.logo {
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: #1e88e5;
   text-decoration: none;
-  white-space: nowrap;
 }
 
-/* =============================
-   CENTER SEARCH
-============================= */
-
-.navbar-center {
+/* SEARCH */
+.navbar-search {
   flex: 1;
-  display: flex;
-  justify-content: center;
-
-  min-width: 0;
-  padding-inline: clamp(8px, 2vw, 20px);
+  max-width: 450px;
+  margin: 0 20px;
 }
 
-/* =============================
-   RIGHT ACTIONS
-============================= */
+.navbar-search input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 0.95rem;
+}
 
+/* RIGHT */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: clamp(10px, 2vw, 22px);
+  gap: 15px;
 }
 
-/* Cart */
-
-.navbar-cart {
-  font-size: clamp(18px, 3vw, 22px);
+.icon-btn {
   position: relative;
-  text-decoration: none;
+  font-size: 1.3rem;
+  color: #444;
 }
 
-.cart-badge {
+.badge {
   position: absolute;
-  inset-block-start: -6px;
-  inset-inline-end: -8px;
-
-  background: #ef4444;
+  top: -6px;
+  right: -8px;
+  background: red;
   color: white;
-
-  font-size: 11px;
+  font-size: 10px;
   padding: 2px 6px;
-  border-radius: 999px;
+  border-radius: 50%;
 }
 
-/* =============================
-   PROFILE
-============================= */
-
-.navbar-profile {
+/* PROFILE */
+.profile-wrapper {
   position: relative;
+}
+
+.profile-btn {
+  font-size: 1.8rem;
+  background: none;
+  border: none;
   cursor: pointer;
 }
 
-.profile-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.avatar {
-  background: #2563eb;
-  color: white;
-  font-size: 13px;
-
-  width: 32px;
-  height: 32px;
-
-  border-radius: 999px;
-
-  display: grid;
-  place-items: center;
-}
-
-.name {
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.chevron {
-  font-size: 12px;
-}
-
-/* =============================
-   DROPDOWN
-============================= */
-
+/* DROPDOWN */
 .profile-dropdown {
   position: absolute;
-  inset-inline-end: 0;
-  top: calc(100% + 10px);
-
-  width: min(88vw, 240px);
-
+  right: 0;
+  top: 45px;
   background: white;
-
-  border-radius: 14px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
-
-  padding: 10px;
+  width: 200px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 
   display: flex;
   flex-direction: column;
-
-  z-index: 900;
-
-  max-height: 70vh;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
-/* Dropdown links */
-
-.profile-dropdown a {
-  padding: 10px 14px;
-
-  border-radius: 8px;
-
+.profile-dropdown a,
+.logout-btn {
+  padding: 12px 15px;
   text-decoration: none;
-
-  color: #111827;
-  font-size: 14px;
+  color: #333;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
 }
 
-.profile-dropdown a:hover {
-  background: #f3f4f6;
+.profile-dropdown a:hover,
+.logout-btn:hover {
+  background: #f5f5f5;
 }
 
-.divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 6px 0;
+.logout-btn {
+  color: red;
+  font-weight: 600;
 }
 
-.logout {
-  color: #dc2626;
-  font-weight: 500;
+.profile-dropdown hr {
+  border: none;
+  border-top: 1px solid #eee;
 }
 
-/* =============================
-   TABLET
-============================= */
-
-@media (max-width: 1024px) {
-  :root {
-    --nav-height: 64px;
-  }
-
-  .navbar-center {
-    padding-inline: 8px;
-  }
-}
-
-/* =============================
-   MOBILE
-============================= */
-
+/* 📱 MOBILE */
 @media (max-width: 768px) {
-  .nearshop-navbar {
-    border-radius: 18px;
-    margin: 8px;
-  }
-
-  .navbar-center {
+  .navbar-search {
     display: none;
   }
 
-  .name {
-    display: none;
+  .logo {
+    font-size: 1.2rem;
   }
 }
 
-/* =============================
-   SMALL PHONES
-============================= */
-
-@media (max-width: 420px) {
-  :root {
-    --nav-height: 58px;
+@media (max-width: 480px) {
+  .navbar-inner {
+    padding: 8px 12px;
   }
 
-  .chevron {
-    display: none;
+  .icon-btn {
+    font-size: 1.1rem;
   }
-}
-
-@media (max-width: 1399px) {
-  .nearshop-navbar{
-    width: 765px;
-  }
-}
-@media (max-width: 975px) {
-    .nearshop-navbar {
-        width: 471px;
-        right: 94px;
-    }
-}
-@media (max-width: 963px) {
-    .nearshop-navbar {
-                width: 424px;
-        right: 72px;
-    }
-}
-@media (max-width: 659px) {
-    .nearshop-navbar {
-                        width: 341px;
-        right: 72px;
-    }
-}
-
-@media (max-width: 539px) {
-    .nearshop-navbar {
-      width: 271px;
-        right: 35px;
-    }
 }

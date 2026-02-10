@@ -20,7 +20,7 @@ const dummyCategories = [
 
 ];
 
-export default function CategoryScroller({ onSelectCategory }) {
+export default function CategoryScroller({ data }) {
   const scrollRef = useRef(null);
 
   const [showLeft, setShowLeft] = useState(false);
@@ -66,7 +66,7 @@ export default function CategoryScroller({ onSelectCategory }) {
 
   return (
     <div className="nearshop-category-outer">
-      <div className="nearshop-category-wrapper">
+      {data && <div className="nearshop-category-wrapper">
         {showLeft && (
           <button
             className="scroll-btn left"
@@ -103,7 +103,7 @@ export default function CategoryScroller({ onSelectCategory }) {
             ▶
           </button>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

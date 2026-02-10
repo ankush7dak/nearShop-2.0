@@ -13,10 +13,10 @@ const CustomerHome = () => {
   return (
     <>
       {/* {shopDetails && <div className="selected-shop-name">{shopDetails.name}</div>} */}
-      <HamburgerMenu />
-      {shopDetails && <NavBar data = {shopDetails}/>}
-      <CategoryScroller></CategoryScroller>
-      <ProductCardContainer></ProductCardContainer>
+      {/* <HamburgerMenu /> */}
+      {<NavBar data = {shopDetails}/>}
+      <CategoryScroller data = {shopDetails}></CategoryScroller>
+      <ProductCardContainer data = {shopDetails}></ProductCardContainer>
     </>
   );
 };

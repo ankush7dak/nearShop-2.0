@@ -17,6 +17,7 @@ import MyCart from './components/customer/MyCart/MyCart';
 
 //customer context provider
 import { CustomerProvider } from './components/customer/CustomerContext/CustomerContext';
+import ShopkeeperDashboard from './components/shopkeeper/ShopkeeperDashboard/ShopkeeperDashboard';
 
 
 function App() {
@@ -31,7 +32,7 @@ function App() {
         {/* Protected route */}
         <Route path="/customer/home" element={
           <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
-            <HamburgerMenu></HamburgerMenu>
+            {/* <HamburgerMenu></HamburgerMenu> */}
             <NearShopSearchPage></NearShopSearchPage>
           </ProtectedRoute>
         }
@@ -83,9 +84,10 @@ function App() {
           </ProtectedRoute>
         }
         />
-        <Route path="/shopkeeper/home" element={
+        <Route path="/shopkeeper/dashboard" element={
           <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
-            <HamburgerMenu></HamburgerMenu>
+            {/* <HamburgerMenu></HamburgerMenu> */}
+            <ShopkeeperDashboard></ShopkeeperDashboard>
           </ProtectedRoute>
         }
         />

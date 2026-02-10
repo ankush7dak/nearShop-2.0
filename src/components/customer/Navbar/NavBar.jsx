@@ -1,126 +1,78 @@
-import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { FaUserCircle, FaShoppingCart, FaBell } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import "./NavBar.css";
 import HamburgerMenu from "../../Hamburgers/HamburgerMenu";
-import SearchBar from "../searchComponent/searchBar";
 
 export default function NavBar({ data }) {
-  const [openProfile, setOpenProfile] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate();
-  const cartCount = 0 
 
-  const userName =
-    localStorage.getItem("username") || "Ankush";
-  const role =
-    localStorage.getItem("role") || "customer";
-
-  // Close when clicking outside
   useEffect(() => {
-    if (!openProfile) return;
-
     const handler = (e) => {
-      if (!dropdownRef.current?.contains(e.target)) {
-        setOpenProfile(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setProfileOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [openProfile]);
-
-  // Close when pressing ESC
-  useEffect(() => {
-    if (!openProfile) return;
-
-    const handleEsc = (e) => {
-      if (e.key === "Escape") {
-        setOpenProfile(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [openProfile]);
-
-  const handleLogout = () => {
-    localStorage.clear(); // or remove specific keys
-    navigate("/login");
-  };
+  }, []);
 
   return (
-    <header className="nearshop-navbar">
-      {/* Left: Hamburger / Logo */}
-      {data && <div className="shop-name-container">{data.name}</div>}
-      {/* Center: Search */}
-      <SearchBar />
+    <nav className="navbar">
+      {data && (
+        <div className="navbar-inner">
+          {/* LEFT */}
+          <div className="navbar-left">
+            <HamburgerMenu />
 
-      {/* Right: Actions */}
-      <div className="navbar-right">
-        {/* Cart */}
-        <Link to="/customer/cart" className="navbar-cart">
-          🛍️
-          {cartCount > 0 && (
-            <span className="cart-badge">{cartCount}</span>
-          )}
-        </Link>
+            <Link to="/" className="logo">
+              {data.name}
+            </Link>
+          </div>
 
-        {/* Profile */}
-        <div className="navbar-profile" ref={dropdownRef}>
-          <button
-            className="profile-trigger"
-            onClick={() => setOpenProfile((p) => !p)}
-            aria-haspopup="menu"
-            aria-expanded={openProfile}
-          >
-            <span className="avatar">
-              {userName.charAt(0).toUpperCase()}
-            </span>
-            <span className="name">{userName}</span>
-            <span className="chevron">▾</span>
-          </button>
+          {/* CENTER SEARCH */}
+          <div className="navbar-search">
+            <input type="text" placeholder="Search shops, products..." />
+          </div>
 
-          {openProfile && (
-            <div className="profile-dropdown" role="menu">
-              {role === "customer" && (
-                <>
-                  <Link to="/customer/profile">Profile</Link>
-                  <Link to="/customer/orders">My Orders</Link>
-                  <Link to="/customer/cart">My Cart</Link>
+          {/* RIGHT */}
+          <div className="navbar-right">
+            <Link to="/cart" className="icon-btn">
+              <FaShoppingCart />
+              <span className="badge">2</span>
+            </Link>
 
-                  <Link to="/customer/notifications">
-                    Notifications
-                  </Link>
-                </>
-              )}
+            <Link to="/notifications" className="icon-btn">
+              <FaBell />
+              <span className="badge">5</span>
+            </Link>
 
-              {role === "shopkeeper" && (
-                <>
-                  <Link to="/shopkeeper/profile">Profile</Link>
-                  <Link to="/shopkeeper/orders">My Orders</Link>
-                  <Link to="/shopkeeper/notifications">
-                    Notifications
-                  </Link>
-                  <Link to="/products">My Products</Link>
-                </>
-              )}
-
-              {role === "superadmin" && (
-                <Link to="/dashboard">Admin Dashboard</Link>
-              )}
-
-              <div className="divider" />
-
+            {/* PROFILE */}
+            <div className="profile-wrapper" ref={dropdownRef}>
               <button
-                className="logout"
-                onClick={handleLogout}
+                className="profile-btn"
+                onClick={() => setProfileOpen(!profileOpen)}
               >
-                Logout
+                <FaUserCircle />
               </button>
+
+              {profileOpen && (
+                <div className="profile-dropdown">
+                  <Link to="/profile">My Profile</Link>
+                  <Link to="/orders">My Orders</Link>
+                  <Link to="/cart">My Cart</Link>
+                  <Link to="/saved">Saved Shops</Link>
+                  <Link to="/notifications">Notifications</Link>
+                  <Link to="/help">Help & Support</Link>
+                  <hr />
+                  <button className="logout-btn">Logout</button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </header>
+      )}
+    </nav>
   );
 }

@@ -3,9 +3,9 @@
 ============================ */
 
 .hamburger-icon {
-  position: fixed;
+  /* position: fixed;
   top: 18px;
-  left: 18px;
+  left: 18px; */
   width: 32px;
   height: 24px;
   cursor: pointer;

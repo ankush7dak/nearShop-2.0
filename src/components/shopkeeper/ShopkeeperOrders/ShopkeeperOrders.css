@@ -1,0 +1,201 @@
+/* ================================
+   ROOT VARIABLES
+================================ */
+:root {
+  --sk-bg: #f9fafb;
+  --sk-card: #ffffff;
+  --sk-border: #e5e7eb;
+
+  --sk-primary: #2563eb;
+  --sk-success: #16a34a;
+  --sk-warning: #f59e0b;
+  --sk-danger: #dc2626;
+
+  --sk-text: #111827;
+  --sk-muted: #6b7280;
+
+  --sk-radius: 14px;
+}
+
+/* ================================
+   PAGE
+================================ */
+
+.sk-orders-page {
+  padding: 24px;
+  background: var(--sk-bg);
+  min-height: calc(100vh - 64px);
+}
+
+/* ================================
+   HEADER
+================================ */
+
+.sk-orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+.sk-orders-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--sk-text);
+}
+
+.sk-orders-header select {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--sk-border);
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ================================
+   LIST
+================================ */
+
+.sk-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ================================
+   CARD
+================================ */
+
+.sk-order-card {
+  background: var(--sk-card);
+  border-radius: var(--sk-radius);
+  padding: 16px 18px;
+
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 2fr;
+  align-items: center;
+
+  border: 1px solid var(--sk-border);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sk-order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+}
+
+/* ================================
+   MAIN
+================================ */
+
+.sk-order-main h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.sk-order-main p {
+  font-size: 13px;
+  color: var(--sk-muted);
+}
+
+/* ================================
+   STATUS
+================================ */
+
+.status {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status.new {
+  background: #eff6ff;
+  color: var(--sk-primary);
+}
+
+.status.preparing {
+  background: #fff7ed;
+  color: var(--sk-warning);
+}
+
+.status.ready {
+  background: #ecfdf5;
+  color: var(--sk-success);
+}
+
+.status.completed {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* ================================
+   META
+================================ */
+
+.sk-order-meta {
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+  color: var(--sk-muted);
+}
+
+/* ================================
+   ACTIONS
+================================ */
+
+.sk-order-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.sk-order-actions button {
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: none;
+
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  background: var(--sk-primary);
+  color: white;
+
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.sk-order-actions button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.sk-order-actions .danger {
+  background: var(--sk-danger);
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 900px) {
+  .sk-order-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .sk-order-meta {
+    justify-content: space-between;
+  }
+
+  .sk-order-actions {
+    justify-content: flex-start;
+  }
+}
