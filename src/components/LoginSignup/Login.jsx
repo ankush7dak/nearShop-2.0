@@ -1,48 +1,75 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./LoginSignup.css";
-import { Roles } from "../../constants/Roles";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { HOME_BY_ROLE } from "../../constants/HomeByRole";
+import { LINKS } from "../../constants/LinksUtility";
+import "./LoginSignup.css";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email === "customer@nearshop.com" && password === "123456") {
-        console.log('login handled');
-      localStorage.setItem("role", "customer");
-      navigate(HOME_BY_ROLE.customer);
-    } else if (email === "shop@nearshop.com" && password === "123456") {
-      localStorage.setItem("role", "shopkeeper");
-      navigate(HOME_BY_ROLE.shopkeeper);
-    } else if (email === "admin@nearshop.com" && password === "123456") {
-      localStorage.setItem("role", "superadmin");
-      navigate("/");
-    } else {
+    setError("");
+
+    try {
+      const res = await axios.post(
+        `${LINKS.API_BASE_URL}/auth/login`,
+        { mobile, password }
+      );
+      console.log(res.data);
+
+      const token = res.data;
+
+      if (!token) {
+        setError("Invalid server response");
+        return;
+      }
+
+      // Save token
+      localStorage.setItem("token", token);
+
+      // Decode token
+      const decoded = jwtDecode(token);
+      console.log(decoded)
+
+      const role = decoded?.role;
+
+      if (!role || !HOME_BY_ROLE[role.toLowerCase()]) {
+        setError("Invalid role in token");
+        return;
+      }
+
+      localStorage.setItem("role", role);
+
+      // Navigate based on role
+      navigate(HOME_BY_ROLE[role.toLowerCase()]);
+
+    } catch (err) {
       setError("Invalid credentials");
     }
-  };
-
-  const handleGoogleLogin = () => {
-    alert("Google login coming soon!");
   };
 
   return (
     <div className="auth-container">
       <form onSubmit={handleLogin} className="auth-form">
         <h2>Login</h2>
-        {error && <p style={{color: "red"}}>{error}</p>}
+
+        {error && <p className="error">{error}</p>}
+
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Mobile"
+          value={mobile}
+          onChange={(e) => setMobile(e.target.value)}
           required
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -50,14 +77,9 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
         <button type="submit">Login</button>
-        <button
-          type="button"
-          className="google-login-btn"
-          onClick={handleGoogleLogin}
-        >
-          Login with Google
-        </button>
+
         <p>
           Don't have an account?{" "}
           <span onClick={() => navigate("/signup")}>Signup</span>

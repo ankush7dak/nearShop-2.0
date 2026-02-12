@@ -1,0 +1,96 @@
+.inventory-pro {
+  padding: 20px;
+}
+
+/* Header */
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bulk-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Toolbar */
+.inventory-toolbar {
+  position: sticky;
+  top: 0;
+  background: #f9fafb;
+  padding: 12px;
+  margin: 14px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-radius: 12px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Table */
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.out-row {
+  background: #fef2f2;
+}
+
+/* Stock colors */
+.ok { color: #16a34a; }
+.low { color: #f59e0b; }
+.out { color: #dc2626; }
+
+/* Toggle */
+.toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Mobile */
+.mobile-grid {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .table-wrap {
+    display: none;
+  }
+
+  .mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .mobile-card {
+    background: white;
+    padding: 14px;
+    border-radius: 12px;
+  }
+}

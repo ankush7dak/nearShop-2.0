@@ -1,120 +1,192 @@
 import { useState } from "react";
 import "./ShopkeeperOrders.css";
+import {
+  FaSearch,
+  FaCheck,
+  FaTimes,
+  FaEye,
+  FaTruck,
+  FaBoxOpen,
+} from "react-icons/fa";
+import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
 
-const dummyOrders = [
+const DUMMY_ORDERS = [
   {
     id: "ORD1023",
-    customer: "Rohit",
-    items: 5,
-    total: 540,
+    customer: "Rahul",
+    amount: 540,
     status: "NEW",
-    type: "DELIVERY",
-    time: "10:42 AM",
+    time: "5 mins ago",
+    items: ["Rice", "Milk", "Bread"],
   },
   {
     id: "ORD1024",
-    customer: "Aman",
-    items: 2,
-    total: 180,
+    customer: "Sneha",
+    amount: 320,
     status: "PREPARING",
-    type: "PICKUP",
-    time: "10:15 AM",
+    time: "20 mins ago",
+    items: ["Paracetamol", "ORS"],
+  },
+  {
+    id: "ORD1025",
+    customer: "Amit",
+    amount: 890,
+    status: "DELIVERED",
+    time: "1 hr ago",
+    items: ["Shampoo", "Soap"],
   },
 ];
 
+const STATUS_TABS = ["ALL", "NEW", "PREPARING", "OUT_FOR_DELIVERY", "DELIVERED"];
+
 export default function ShopkeeperOrders() {
-  const [orders, setOrders] = useState(dummyOrders);
-  const [filter, setFilter] = useState("ALL");
+  const [orders, setOrders] = useState(DUMMY_ORDERS);
+  const [activeTab, setActiveTab] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const filteredOrders =
-    filter === "ALL"
-      ? orders
-      : orders.filter((o) => o.status === filter);
+  const filteredOrders = orders.filter((o) => {
+    const matchStatus =
+      activeTab === "ALL" ? true : o.status === activeTab;
 
-  return (
-    <div className="sk-orders-page">
+    const matchSearch =
+      o.id.toLowerCase().includes(search.toLowerCase()) ||
+      o.customer.toLowerCase().includes(search.toLowerCase());
 
-      {/* HEADER */}
-      <div className="sk-orders-header">
-        <h2>Orders</h2>
+    return matchStatus && matchSearch;
+  });
 
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        >
-          <option value="ALL">All</option>
-          <option value="NEW">New</option>
-          <option value="PREPARING">Preparing</option>
-          <option value="READY">Ready</option>
-          <option value="COMPLETED">Completed</option>
-        </select>
-      </div>
-
-      {/* LIST */}
-      <div className="sk-orders-list">
-        {filteredOrders.map((order) => (
-          <OrderCard
-            key={order.id}
-            order={order}
-            setOrders={setOrders}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ---------------- CARD ---------------- */
-
-function OrderCard({ order, setOrders }) {
-  const handleStatusChange = (newStatus) => {
+  const updateStatus = (id, status) => {
     setOrders((prev) =>
-      prev.map((o) =>
-        o.id === order.id ? { ...o, status: newStatus } : o
-      )
+      prev.map((o) => (o.id === id ? { ...o, status } : o))
     );
   };
 
   return (
-    <div className="sk-order-card">
+    <>
+    <ShopkeeperTopNav></ShopkeeperTopNav>
+    <div className="orders-page">
+      <h2>📦 Orders Management</h2>
 
-      <div className="sk-order-main">
-        <h4>{order.id}</h4>
-        <p>{order.customer}</p>
-        <span className={`status ${order.status.toLowerCase()}`}>
-          {order.status}
-        </span>
-      </div>
+      {/* Top Bar */}
+      <div className="orders-topbar">
+        <div className="search-box">
+          <FaSearch />
+          <input
+            placeholder="Search by Order ID or Customer..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
 
-      <div className="sk-order-meta">
-        <p>{order.items} items</p>
-        <p>₹{order.total}</p>
-        <p>{order.type}</p>
-        <p>{order.time}</p>
-      </div>
-
-      <div className="sk-order-actions">
-        {order.status === "NEW" && (
-          <>
-            <button onClick={() => handleStatusChange("PREPARING")}>
-              Accept
+        <div className="status-tabs">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab}
+              className={activeTab === tab ? "active" : ""}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.replaceAll("_", " ")}
             </button>
-            <button className="danger">Reject</button>
-          </>
-        )}
-
-        {order.status === "PREPARING" && (
-          <button onClick={() => handleStatusChange("READY")}>
-            Mark Ready
-          </button>
-        )}
-
-        {order.status === "READY" && (
-          <button onClick={() => handleStatusChange("COMPLETED")}>
-            Complete
-          </button>
-        )}
+          ))}
+        </div>
       </div>
+
+      {/* Orders Grid */}
+      <div className="orders-grid">
+        {filteredOrders.length === 0 && (
+          <p className="no-orders">No orders found</p>
+        )}
+
+        {filteredOrders.map((order) => (
+          <div className="order-card" key={order.id}>
+            <div className="order-head">
+              <span className="order-id">{order.id}</span>
+              <span className={`status ${order.status.toLowerCase()}`}>
+                {order.status.replaceAll("_", " ")}
+              </span>
+            </div>
+
+            <p>
+              <strong>Customer:</strong> {order.customer}
+            </p>
+            <p>
+              <strong>Items:</strong> {order.items.join(", ")}
+            </p>
+            <p>
+              <strong>Amount:</strong> ₹{order.amount}
+            </p>
+            <p className="time">{order.time}</p>
+
+            <div className="order-actions">
+              <button
+                className="view"
+                onClick={() => setSelectedOrder(order)}
+              >
+                <FaEye /> View
+              </button>
+
+              {order.status === "NEW" && (
+                <>
+                  <button
+                    className="accept"
+                    onClick={() => updateStatus(order.id, "PREPARING")}
+                  >
+                    <FaCheck /> Accept
+                  </button>
+                  <button
+                    className="reject"
+                    onClick={() => updateStatus(order.id, "CANCELLED")}
+                  >
+                    <FaTimes /> Reject
+                  </button>
+                </>
+              )}
+
+              {order.status === "PREPARING" && (
+                <button
+                  className="delivery"
+                  onClick={() =>
+                    updateStatus(order.id, "OUT_FOR_DELIVERY")
+                  }
+                >
+                  <FaTruck /> Out for delivery
+                </button>
+              )}
+
+              {order.status === "OUT_FOR_DELIVERY" && (
+                <button
+                  className="complete"
+                  onClick={() => updateStatus(order.id, "DELIVERED")}
+                >
+                  <FaBoxOpen /> Complete
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal */}
+      {selectedOrder && (
+        <div className="modal-overlay" onClick={() => setSelectedOrder(null)}>
+          <div className="order-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Order Details</h3>
+            <p><strong>ID:</strong> {selectedOrder.id}</p>
+            <p><strong>Customer:</strong> {selectedOrder.customer}</p>
+            <p><strong>Status:</strong> {selectedOrder.status}</p>
+            <p><strong>Items:</strong></p>
+            <ul>
+              {selectedOrder.items.map((i, idx) => (
+                <li key={idx}>{i}</li>
+              ))}
+            </ul>
+
+            <button onClick={() => setSelectedOrder(null)}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
+    </>
   );
 }

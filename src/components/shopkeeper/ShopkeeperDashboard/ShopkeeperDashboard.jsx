@@ -30,23 +30,25 @@ export default function ShopkeeperDashboard() {
           link="/shopkeeper/orders"
         />
         <StatCard
-          icon={<FaRupeeSign />}
-          title="Today’s Revenue"
-          value="₹4,520"
-        />
-        <StatCard
           icon={<FaShoppingBag />}
           title="Total Products"
           value="245"
-          link="/shopkeeper/products"
+          link="/shopkeeper/inventory"
         />
         <StatCard
           icon={<FaBoxes />}
           title="Low Stock"
           value="8"
           danger
-          link="/shopkeeper/inventory"
+          link="/shopkeeper/stocks"
         />
+        <StatCard
+          icon={<FaRupeeSign />}
+          title="Today’s Revenue"
+          value="₹4,520"
+        />
+        
+        
       </div>
 
       {/* QUICK ACTIONS */}
@@ -58,7 +60,7 @@ export default function ShopkeeperDashboard() {
             📦 Manage Orders
           </Link>
 
-          <Link to="/shopkeeper/products" className="sk-action-card">
+          <Link to="/shopkeeper/add-products" className="sk-action-card">
             🛒 Add Products
           </Link>
 

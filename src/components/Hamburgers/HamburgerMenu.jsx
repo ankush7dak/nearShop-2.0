@@ -23,9 +23,11 @@ const HamburgerMenu = () => {
     ],
     shopkeeper: [
       { name: "Home", path: HOME_BY_ROLE.shopkeeper },
-      { name: "Products", path: "/products" },
-      { name: "Orders", path: "/orders" },
+      { name: "Products", path: "/shopkeeper/inventory" },
+      { name: "Orders", path: "/shopkeeper/orders" },
       { name: "Profile", path: "/shopkeeper/profile" },
+            { name: "Logout", path: "/login" },
+
     ],
     superadmin: [
       { name: "Dashboard", path: "/" },

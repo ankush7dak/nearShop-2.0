@@ -5,8 +5,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   console.log('check+'+role);
   console.log(allowedRoles==role);
 
-  if (!role) return <Navigate to="/login" replace />;
-
+  if (!role ) return <Navigate to="/login" replace />;
+  console.log("check here" + allowedRoles.toLocaleLowerCase === (role.toLocaleLowerCase));
   if (!allowedRoles.toLocaleLowerCase === (role.toLocaleLowerCase)) return <Navigate to="/login" replace />;
   // console.log( "returning child");
   return children;

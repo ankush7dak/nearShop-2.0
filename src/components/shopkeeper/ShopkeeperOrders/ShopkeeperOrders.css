@@ -1,201 +1,184 @@
-/* ================================
-   ROOT VARIABLES
-================================ */
-:root {
-  --sk-bg: #f9fafb;
-  --sk-card: #ffffff;
-  --sk-border: #e5e7eb;
-
-  --sk-primary: #2563eb;
-  --sk-success: #16a34a;
-  --sk-warning: #f59e0b;
-  --sk-danger: #dc2626;
-
-  --sk-text: #111827;
-  --sk-muted: #6b7280;
-
-  --sk-radius: 14px;
+.orders-page {
+  padding: 20px;
 }
 
-/* ================================
-   PAGE
-================================ */
-
-.sk-orders-page {
-  padding: 24px;
-  background: var(--sk-bg);
-  min-height: calc(100vh - 64px);
+.orders-page h2 {
+  margin-bottom: 15px;
 }
 
-/* ================================
-   HEADER
-================================ */
-
-.sk-orders-header {
+/* Top Bar */
+.orders-topbar {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: space-between;
-  align-items: center;
-
   margin-bottom: 20px;
 }
 
-.sk-orders-header h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--sk-text);
-}
-
-.sk-orders-header select {
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--sk-border);
+.search-box {
+  display: flex;
+  align-items: center;
   background: white;
-  font-size: 14px;
-  cursor: pointer;
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  min-width: 250px;
 }
 
-/* ================================
-   LIST
-================================ */
+.search-box input {
+  border: none;
+  outline: none;
+  margin-left: 8px;
+  width: 100%;
+}
 
-.sk-orders-list {
+.status-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.status-tabs button {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.status-tabs .active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* Orders Grid */
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.order-card {
+  background: white;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 6px;
 }
 
-/* ================================
-   CARD
-================================ */
-
-.sk-order-card {
-  background: var(--sk-card);
-  border-radius: var(--sk-radius);
-  padding: 16px 18px;
-
-  display: grid;
-  grid-template-columns: 1.2fr 2fr 2fr;
-  align-items: center;
-
-  border: 1px solid var(--sk-border);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+.order-head {
+  display: flex;
+  justify-content: space-between;
 }
 
-.sk-order-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
-}
-
-/* ================================
-   MAIN
-================================ */
-
-.sk-order-main h4 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.sk-order-main p {
-  font-size: 13px;
-  color: var(--sk-muted);
-}
-
-/* ================================
-   STATUS
-================================ */
-
-.status {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
+.order-id {
   font-weight: 600;
 }
 
+.status {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+/* Status Colors */
 .status.new {
-  background: #eff6ff;
-  color: var(--sk-primary);
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .status.preparing {
-  background: #fff7ed;
-  color: var(--sk-warning);
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
-.status.ready {
-  background: #ecfdf5;
-  color: var(--sk-success);
+.status.out_for_delivery {
+  background: #ede9fe;
+  color: #6d28d9;
 }
 
-.status.completed {
-  background: #f3f4f6;
-  color: #374151;
+.status.delivered {
+  background: #dcfce7;
+  color: #166534;
 }
 
-/* ================================
-   META
-================================ */
+.status.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
 
-.sk-order-meta {
+.order-actions {
+  margin-top: 10px;
   display: flex;
-  gap: 18px;
-  font-size: 13px;
-  color: var(--sk-muted);
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-/* ================================
-   ACTIONS
-================================ */
-
-.sk-order-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.sk-order-actions button {
-  padding: 7px 14px;
-  border-radius: 10px;
+.order-actions button {
+  flex: 1;
+  padding: 7px;
+  border-radius: 6px;
   border: none;
-
-  font-size: 13px;
-  font-weight: 600;
   cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
 
-  background: var(--sk-primary);
+/* Buttons */
+.view { background: #f3f4f6; }
+.accept { background: #22c55e; color: white; }
+.reject { background: #ef4444; color: white; }
+.delivery { background: #6366f1; color: white; }
+.complete { background: #0d9488; color: white; }
+
+.no-orders {
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.order-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  max-width: 400px;
+  width: 90%;
+}
+
+.order-modal button {
+  margin-top: 10px;
+  background: #2563eb;
   color: white;
-
-  transition: opacity 0.15s ease, transform 0.1s ease;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.sk-order-actions button:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.sk-order-actions .danger {
-  background: var(--sk-danger);
-}
-
-/* ================================
-   RESPONSIVE
-================================ */
-
-@media (max-width: 900px) {
-  .sk-order-card {
-    grid-template-columns: 1fr;
-    gap: 12px;
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .orders-topbar {
+    flex-direction: column;
   }
 
-  .sk-order-meta {
-    justify-content: space-between;
-  }
-
-  .sk-order-actions {
-    justify-content: flex-start;
+  .status-tabs {
+    overflow-x: auto;
   }
 }

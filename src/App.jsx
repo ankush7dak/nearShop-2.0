@@ -18,6 +18,11 @@ import MyCart from './components/customer/MyCart/MyCart';
 //customer context provider
 import { CustomerProvider } from './components/customer/CustomerContext/CustomerContext';
 import ShopkeeperDashboard from './components/shopkeeper/ShopkeeperDashboard/ShopkeeperDashboard';
+import ShopkeeperOrders from './components/shopkeeper/ShopkeeperOrders/ShopkeeperOrders';
+import  ShopkeeperInventory from './components/shopkeeper/ShopkeeperProducts/ShopkeeperInventory';
+import ShopkeeperLowStock from './components/shopkeeper/ShopkeeperLowStock/ShopkeeperLowStock';
+import ShopkeeperAddProduct from './components/shopkeeper/ShopkeeperAddProduct/ShopkeeperAddProduct';
+import ShopkeeperProfile from './components/shopkeeper/ShopkeeperProfile/ShopkeeperProfile';
 
 
 function App() {
@@ -84,10 +89,50 @@ function App() {
           </ProtectedRoute>
         }
         />
+        {/* --------------------------------------------------------- */}
+
+
+
+
         <Route path="/shopkeeper/dashboard" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.SHOPKEEPER]}>
             {/* <HamburgerMenu></HamburgerMenu> */}
             <ShopkeeperDashboard></ShopkeeperDashboard>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/shopkeeper/profile" element={
+          <ProtectedRoute allowedRoles={[Roles.SHOPKEEPER]}>
+            {/* <HamburgerMenu></HamburgerMenu> */}
+            <ShopkeeperProfile></ShopkeeperProfile>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/shopkeeper/orders" element={
+          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+            {/* <HamburgerMenu></HamburgerMenu> */}
+            <ShopkeeperOrders></ShopkeeperOrders>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/shopkeeper/inventory" element={
+          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+            {/* <HamburgerMenu></HamburgerMenu> */}
+            <ShopkeeperInventory></ShopkeeperInventory>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/shopkeeper/add-products" element={
+          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+            {/* <HamburgerMenu></HamburgerMenu> */}
+            <ShopkeeperAddProduct></ShopkeeperAddProduct>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/shopkeeper/stocks" element={
+          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+            {/* <HamburgerMenu></HamburgerMenu> */}
+            <ShopkeeperLowStock></ShopkeeperLowStock>
           </ProtectedRoute>
         }
         />

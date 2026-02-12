@@ -89,3 +89,25 @@ body {
   color: #007bff;
   cursor: pointer;
 }
+
+.error-text {
+  color: #e63946;
+  font-size: 14px;
+}
+
+.role-group {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 0;
+}
+
+.terms {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
