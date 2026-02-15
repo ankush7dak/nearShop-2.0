@@ -1,0 +1,34 @@
+.shop-form-container {
+  max-width: 700px;
+  margin: auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.shop-form input,
+.shop-form textarea,
+.shop-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.row,
+.time-row {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

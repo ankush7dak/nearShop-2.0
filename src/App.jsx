@@ -23,6 +23,7 @@ import  ShopkeeperInventory from './components/shopkeeper/ShopkeeperProducts/Sho
 import ShopkeeperLowStock from './components/shopkeeper/ShopkeeperLowStock/ShopkeeperLowStock';
 import ShopkeeperAddProduct from './components/shopkeeper/ShopkeeperAddProduct/ShopkeeperAddProduct';
 import ShopkeeperProfile from './components/shopkeeper/ShopkeeperProfile/ShopkeeperProfile';
+import ShopRegistration from './components/shopkeeper/ShopRegistration/ShopRegistration';
 
 
 function App() {
@@ -36,7 +37,7 @@ function App() {
 
         {/* Protected route */}
         <Route path="/customer/home" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.customer]}>
             {/* <HamburgerMenu></HamburgerMenu> */}
             <NearShopSearchPage></NearShopSearchPage>
           </ProtectedRoute>
@@ -44,7 +45,7 @@ function App() {
         />
 
           <Route path="/customer/nearby-shops" element={
-            <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+            <ProtectedRoute allowedRoles={[Roles.customer]}>
               {/* <CustomerProvider> */}
               <CustomerHome></CustomerHome>
 
@@ -54,21 +55,21 @@ function App() {
 
 
         <Route path="/customer/profile" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.customer]}>
             <HamburgerMenu></HamburgerMenu>
             <ProfilePage></ProfilePage>
           </ProtectedRoute>
         }
         />
         <Route path="/customer/orders" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.customer]}>
             <HamburgerMenu></HamburgerMenu>
             <MyOrders></MyOrders>
           </ProtectedRoute>
         }
         />
         <Route path="/customer/notifications" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.customer]}>
             <HamburgerMenu></HamburgerMenu>
             <NotificationsPage></NotificationsPage>
           </ProtectedRoute>
@@ -76,14 +77,14 @@ function App() {
         />
 
         <Route path="/customer/visited-shops" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.customer]}>
             <HamburgerMenu></HamburgerMenu>
             <VisitedShops></VisitedShops>
           </ProtectedRoute>
         }
         />
         <Route path="/customer/cart" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.customer]}>
             <HamburgerMenu></HamburgerMenu>
             <MyCart></MyCart>
           </ProtectedRoute>
@@ -95,58 +96,55 @@ function App() {
 
 
         <Route path="/shopkeeper/dashboard" element={
-          <ProtectedRoute allowedRoles={[Roles.SHOPKEEPER]}>
+          <ProtectedRoute allowedRoles={[Roles.shopkeeper]}>
             {/* <HamburgerMenu></HamburgerMenu> */}
             <ShopkeeperDashboard></ShopkeeperDashboard>
           </ProtectedRoute>
         }
         />
+        <Route path="/shopkeeper/registration" element={
+          <ProtectedRoute allowedRoles={[Roles.shopkeeper]}>
+            {/* <HamburgerMenu></HamburgerMenu> */}
+            <ShopRegistration></ShopRegistration>
+          </ProtectedRoute>
+        }
+        />
         <Route path="/shopkeeper/profile" element={
-          <ProtectedRoute allowedRoles={[Roles.SHOPKEEPER]}>
+          <ProtectedRoute allowedRoles={[Roles.shopkeeper]}>
             {/* <HamburgerMenu></HamburgerMenu> */}
             <ShopkeeperProfile></ShopkeeperProfile>
           </ProtectedRoute>
         }
         />
         <Route path="/shopkeeper/orders" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.shopkeeper]}>
             {/* <HamburgerMenu></HamburgerMenu> */}
             <ShopkeeperOrders></ShopkeeperOrders>
           </ProtectedRoute>
         }
         />
         <Route path="/shopkeeper/inventory" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.shopkeeper]}>
             {/* <HamburgerMenu></HamburgerMenu> */}
             <ShopkeeperInventory></ShopkeeperInventory>
           </ProtectedRoute>
         }
         />
         <Route path="/shopkeeper/add-products" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.shopkeeper]}>
             {/* <HamburgerMenu></HamburgerMenu> */}
             <ShopkeeperAddProduct></ShopkeeperAddProduct>
           </ProtectedRoute>
         }
         />
         <Route path="/shopkeeper/stocks" element={
-          <ProtectedRoute allowedRoles={[Roles.CUSTOMER]}>
+          <ProtectedRoute allowedRoles={[Roles.shopkeeper]}>
             {/* <HamburgerMenu></HamburgerMenu> */}
             <ShopkeeperLowStock></ShopkeeperLowStock>
           </ProtectedRoute>
         }
         />
-        <Route path="/profile-management" element={
-          <ProtectedRoute allowedRoles={[userRole]}>
-            <HamburgerMenu></HamburgerMenu>
-          </ProtectedRoute>
-        }
-        />
-        <Route path="/notifications" element={
-          <ProtectedRoute allowedRoles={[userRole]}>
-          </ProtectedRoute>
-        }
-        />
+        
 
         {/* Public route */}
         <Route path="/" element={<Login />} />

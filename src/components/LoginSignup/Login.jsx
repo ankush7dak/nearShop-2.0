@@ -5,17 +5,21 @@ import { jwtDecode } from "jwt-decode";
 import { HOME_BY_ROLE } from "../../constants/HomeByRole";
 import { LINKS } from "../../constants/LinksUtility";
 import "./LoginSignup.css";
+import Loader from "../../Loader/Loader";
+import { accessToken } from "../../constants/constant";
 
 const Login = () => {
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loader,setLoader] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoader(true);
 
     try {
       const res = await axios.post(
@@ -23,31 +27,35 @@ const Login = () => {
         { mobile, password }
       );
       console.log(res.data);
+      localStorage.setItem(accessToken, res.data.token);
+      const token = jwtDecode(res.data.token);
+      // Save token
 
-      const token = res.data;
+      if(res.data.accountStatus == 'PENDING'){
+        navigate('/shopkeeper/registration')
+      }
 
       if (!token) {
         setError("Invalid server response");
         return;
       }
 
-      // Save token
-      localStorage.setItem("token", token);
 
       // Decode token
-      const decoded = jwtDecode(token);
+      const decoded = token;
       console.log(decoded)
 
       const role = decoded?.role;
-
+      console.log("login role"+role);
       if (!role || !HOME_BY_ROLE[role.toLowerCase()]) {
         setError("Invalid role in token");
         return;
       }
 
       localStorage.setItem("role", role);
-
+      setLoader(false);
       // Navigate based on role
+      if(res.data.accountStatus != 'PENDING')
       navigate(HOME_BY_ROLE[role.toLowerCase()]);
 
     } catch (err) {
@@ -77,8 +85,7 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-
-        <button type="submit">Login</button>
+          {loader ? <Loader /> : <button type="submit">Login</button>}
 
         <p>
           Don't have an account?{" "}

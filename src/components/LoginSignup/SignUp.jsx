@@ -2,15 +2,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./LoginSignup.css";
+import { LINKS } from "../../constants/LinksUtility";
+import { jwtDecode } from "jwt-decode";
+import { accessToken } from "../../constants/constant";
 
 const SignUp = () => {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
-
   const [mobile, setMobile] = useState("");
-  const [otp, setOtp] = useState("");
-  const [role, setRole] = useState("CUSTOMER");
+  const [otp, setOtp] = useState("45545");
+  const [role, setRole] = useState("customer"); // default role
+  const[password,setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,13 +28,13 @@ const SignUp = () => {
 
     try {
       setLoading(true);
-
-      await axios.post("/auth/send-otp", {
-        mobile,
-        role,
-      });
-
-      setStep(2);
+      console.log('sending');
+      const res = await axios.post(`${LINKS.API_BASE_URL}/auth/send-otp`, { mobile, role });
+      console.log(res.data);
+      if(res.data == "User Already Exists"){
+        setError("User Already Exists");
+      }
+      else setStep(2);
     } catch (err) {
       setError("Failed to send OTP. Try again.");
     } finally {
@@ -42,6 +45,7 @@ const SignUp = () => {
   // ---------------- VERIFY OTP & LOGIN ----------------
   const verifyOtp = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (otp.length !== 6) {
       return setError("Enter valid OTP");
@@ -49,18 +53,19 @@ const SignUp = () => {
 
     try {
       setLoading(true);
+      console.log('verifying' + mobile + " " + otp);
+      const res = await axios.post(`${LINKS.API_BASE_URL}/auth/verify-otp`, { mobile, otp ,password,role });
+      console.log("verify-otp-res " + res);
+      console.log("verifyingOtpres" + res.data.token);
+      localStorage.setItem(accessToken, res.data.token);
+      const token = jwtDecode(res.data.token);
 
-      const res = await axios.post("/auth/verify-otp", {
-        mobile,
-        otp,
-        role,
-      });
-
-      localStorage.setItem("accessToken", res.data.accessToken);
-
-      if (role === "CUSTOMER") navigate("/customer/home");
-      else navigate("/pending-approval");
-
+      localStorage.setItem("role",token.role);
+      const accountStatus = res.data.accountStatus;
+      if (accountStatus == 'ACTIVE' && token.role === "customer") navigate("/customer/home");
+      if (accountStatus == 'ACTIVE' && token.role === "shopkeeper") navigate("/shopkeeper/home");
+      if(accountStatus == 'PENDING' && token.role === "shopkeeper") navigate ("/shopkeeper/registration");
+      // else navigate("/pending-approval");
     } catch (err) {
       setError(err.response?.data?.message || "OTP verification failed");
     } finally {
@@ -101,17 +106,14 @@ const SignUp = () => {
                 <input
                   type="radio"
                   value="SHOPKEEPER"
+                  checked={role === "SHOPKEEPER"}
                   onChange={(e) => setRole(e.target.value)}
                 />
                 Shopkeeper
               </label>
             </div>
 
-            <button
-              type="button"
-              disabled={loading}
-              onClick={sendOtp}
-            >
+            <button type="button" disabled={loading} onClick={sendOtp}>
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
           </>
@@ -132,6 +134,14 @@ const SignUp = () => {
               maxLength="6"
               required
             />
+            <input
+              type="text"
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              maxLength="15"
+              required
+            />
 
             <button disabled={loading}>
               {loading ? "Verifying..." : "Verify & Continue"}
@@ -141,7 +151,10 @@ const SignUp = () => {
               type="button"
               className="link-btn"
               disabled={loading}
-              onClick={sendOtp}
+              onClick={() => {
+                setOtp(""); // reset OTP field
+                sendOtp();
+              }}
             >
               Resend OTP
             </button>
@@ -150,7 +163,9 @@ const SignUp = () => {
 
         <p>
           Already registered?{" "}
-          <span onClick={() => navigate("/login")}>Login</span>
+          <span className="link-span" onClick={() => navigate("/login")}>
+            Login
+          </span>
         </p>
       </form>
     </div>
