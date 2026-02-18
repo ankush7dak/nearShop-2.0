@@ -55,16 +55,12 @@ const SignUp = () => {
       setLoading(true);
       console.log('verifying' + mobile + " " + otp);
       const res = await axios.post(`${LINKS.API_BASE_URL}/auth/verify-otp`, { mobile, otp ,password,role });
-      console.log("verify-otp-res " + res);
-      console.log("verifyingOtpres" + res.data.token);
-      localStorage.setItem(accessToken, res.data.token);
-      const token = jwtDecode(res.data.token);
-
-      localStorage.setItem("role",token.role);
-      const accountStatus = res.data.accountStatus;
-      if (accountStatus == 'ACTIVE' && token.role === "customer") navigate("/customer/home");
-      if (accountStatus == 'ACTIVE' && token.role === "shopkeeper") navigate("/shopkeeper/home");
-      if(accountStatus == 'PENDING' && token.role === "shopkeeper") navigate ("/shopkeeper/registration");
+      if(res.data == 'Login Successful') navigate('/shopkeeper/dashboard');
+      // localStorage.setItem("role",token.role);
+      // const accountStatus = res.data.accountStatus;
+      // if (accountStatus == 'ACTIVE' && token.role === "customer") navigate("/customer/home");
+      // if (accountStatus == 'ACTIVE' && token.role === "shopkeeper") navigate("/shopkeeper/home");
+      // if(accountStatus == 'PENDING' && token.role === "shopkeeper") navigate ("/shopkeeper/registration");
       // else navigate("/pending-approval");
     } catch (err) {
       setError(err.response?.data?.message || "OTP verification failed");

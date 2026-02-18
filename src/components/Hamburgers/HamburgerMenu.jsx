@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import "./HamburgerMenu.css";
 import { HOME_BY_ROLE } from "../../constants/HomeByRole";
+import { jwtDecode } from "jwt-decode";
+import { accessToken } from "../../constants/constant";
+import { AuthContext } from "../../contexts/authcontext/AuthProvider";
 
 const HamburgerMenu = () => {
   const [open, setOpen] = useState(false);
-  const role = localStorage.getItem("role") || "customer";
+  const {user,setUser} = useContext(AuthContext);
+  const role = user;
+  console.log("role check " + role);
+  // const role = localStorage.getItem("role") || "customer";
+  // const role = jwtDecode(localStorage.getItem(accessToken)).role;
+  // const handleLogout= ()=>{
+  //   localStorage.removeItem(accessToken);
+  // }
 
   const menuItems = {
     customer: [
@@ -26,7 +36,7 @@ const HamburgerMenu = () => {
       { name: "Products", path: "/shopkeeper/inventory" },
       { name: "Orders", path: "/shopkeeper/orders" },
       { name: "Profile", path: "/shopkeeper/profile" },
-            { name: "Logout", path: "/login" },
+      { name: "Logout", path: "/login" },
 
     ],
     superadmin: [
@@ -57,7 +67,7 @@ const HamburgerMenu = () => {
         {<ul>
           {menuItems[role].map((item) => (
             <li key={item.name} onClick={() => setOpen(false)}>
-              <Link to={item.path}>{item.name}</Link>
+              {(item.name == 'Logout')?<Link to={item.path} >{item.name}</Link>:<Link to={item.path}>{item.name}</Link>}
             </li>
           ))}
         </ul>}
