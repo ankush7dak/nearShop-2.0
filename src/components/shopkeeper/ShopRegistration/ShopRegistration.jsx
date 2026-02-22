@@ -1,15 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
+import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
+import L from "leaflet";
+
+import "leaflet/dist/leaflet.css";
+import "leaflet-geosearch/dist/geosearch.css";
+
 import "./ShopRegistration.css";
 import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
+import { LINKS } from "../../../constants/LinksUtility";
+
+/* Fix Leaflet marker icon issue */
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png",
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
+});
 
 const ShopRegistration = () => {
   const [formData, setFormData] = useState({
     shopName: "",
-    ownerName: "",
     mobile: "",
     email: "",
-    gstNumber: "",
     description: "",
     openingTime: "",
     closingTime: "",
@@ -23,18 +46,187 @@ const ShopRegistration = () => {
     logo: null,
   });
 
-  const handleChange = (e) => {
+  const [loadingPincode, setLoadingPincode] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [categories,setCategories] = useState([]);
+
+  const indiaCenter = [20.5937, 78.9629];
+
+  /* ===========================
+     Get Current Location
+  ============================ */
+  const handleGetCategories = async ()=>{
+    const response = await axios.get(
+          `${LINKS.API_BASE_URL}/shop/getAllShopCategories`
+        );
+        console.log("categories" + response.data);
+        setCategories(response.data);
+  }
+  const handleOpenMap = () => {
+    setShowMap(true);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          setMarkerPosition([lat, lng]);
+
+          setFormData((prev) => ({
+            ...prev,
+            latitude: lat.toFixed(6),
+            longitude: lng.toFixed(6),
+          }));
+        },
+        (error) => {
+          console.error("Location error:", error);
+          alert("Please allow location access.");
+        }
+      );
+    } else {
+      alert("Geolocation not supported.");
+    }
+  };
+
+  useEffect(() => {
+    if (formData.latitude && formData.longitude) {
+      setMarkerPosition([
+        parseFloat(formData.latitude),
+        parseFloat(formData.longitude),
+      ]);
+    }
+  }, [formData.latitude, formData.longitude]);
+
+  const handleChange = async (e) => {
     const { name, value, files } = e.target;
 
     if (files) {
       setFormData({ ...formData, [name]: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
+      return;
     }
+
+    if (name === "mobile" && !/^\d{0,10}$/.test(value)) return;
+    if (name === "pincode" && !/^\d{0,6}$/.test(value)) return;
+
+    setFormData({ ...formData, [name]: value });
+
+    if (name === "pincode" && value.length === 6) {
+      try {
+        setLoadingPincode(true);
+
+        const response = await axios.get(
+          `https://api.postalpincode.in/pincode/${value}`
+        );
+
+        if (response.data[0].Status === "Success") {
+          const postOffice = response.data[0].PostOffice[0];
+
+          setFormData((prev) => ({
+            ...prev,
+            city: postOffice.District,
+            state: postOffice.State,
+          }));
+        } else {
+          alert("Invalid Pincode");
+        }
+      } catch (error) {
+        console.error("Error fetching pincode:", error);
+      } finally {
+        setLoadingPincode(false);
+      }
+    }
+  };
+
+  /* Click to select location */
+  const LocationSelector = () => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+
+        setMarkerPosition([lat, lng]);
+
+        setFormData((prev) => ({
+          ...prev,
+          latitude: lat.toFixed(6),
+          longitude: lng.toFixed(6),
+        }));
+      },
+    });
+
+    return markerPosition ? <Marker position={markerPosition} /> : null;
+  };
+
+  /* Change Map View Dynamically */
+  const ChangeMapView = ({ center, zoom }) => {
+    const map = useMap();
+
+    useEffect(() => {
+      map.setView(center, zoom);
+    }, [center, zoom, map]);
+
+    return null;
+  };
+
+  /* Search control */
+  const SearchControl = () => {
+    const map = useMap();
+
+    useEffect(() => {
+      const provider = new OpenStreetMapProvider();
+
+      const searchControl = new GeoSearchControl({
+        provider: provider,
+        style: "bar",
+        showMarker: false,
+        showPopup: false,
+        autoClose: true,
+        retainZoomLevel: false,
+        animateZoom: true,
+        searchLabel: "Search location...",
+        keepResult: true,
+      });
+
+      map.addControl(searchControl);
+
+      map.on("geosearch/showlocation", (result) => {
+        const { x, y } = result.location;
+
+        setMarkerPosition([y, x]);
+
+        setFormData((prev) => ({
+          ...prev,
+          latitude: y.toFixed(6),
+          longitude: x.toFixed(6),
+        }));
+      });
+
+      return () => {
+        map.removeControl(searchControl);
+      };
+    }, [map]);
+
+    return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.mobile.length !== 10) {
+      alert("Mobile number must be 10 digits");
+      return;
+    }
+
+    if (formData.pincode.length !== 6) {
+      alert("Pincode must be 6 digits");
+      return;
+    }
+
+    if (!formData.latitude || !formData.longitude) {
+      alert("Please select shop location from map");
+      return;
+    }
 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
@@ -54,161 +246,136 @@ const ShopRegistration = () => {
   };
 
   return (
-
     <>
-    <ShopkeeperTopNav></ShopkeeperTopNav>
-    <div className="shop-form-container">
-      <h2>Shop Registration</h2>
+      <ShopkeeperTopNav />
+      <div className="shop-form-container">
+        <h2>Shop Registration</h2>
 
-      <form onSubmit={handleSubmit} className="shop-form">
+        <form onSubmit={handleSubmit} className="shop-form">
 
-        <input
-          type="text"
-          name="shopName"
-          placeholder="Shop Name"
-          value={formData.shopName}
-          onChange={handleChange}
-          required
-        />
+          <div className="form-group">
+            <label>Shop Name</label>
+            <input type="text" name="shopName" value={formData.shopName} onChange={handleChange} required />
+          </div>
 
-        <input
-          type="text"
-          name="ownerName"
-          placeholder="Owner Name"
-          value={formData.ownerName}
-          onChange={handleChange}
-          required
-        />
+          <div className="form-group">
+            <label>Mobile Number</label>
+            <input type="tel" name="mobile" value={formData.mobile} onChange={handleChange} required />
+          </div>
 
-        <input
-          type="tel"
-          name="mobile"
-          placeholder="Mobile Number"
-          value={formData.mobile}
-          onChange={handleChange}
-          required
-        />
+          <div className="form-group">
+            <label>Email</label>
+            <input type="email" name="email" value={formData.email} onChange={handleChange} />
+          </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
+          <div className="form-group">
+            <label>Description</label>
+            <textarea name="description" value={formData.description} onChange={handleChange} />
+          </div>
 
-        <input
-          type="text"
-          name="gstNumber"
-          placeholder="GST Number"
-          value={formData.gstNumber}
-          onChange={handleChange}
-        />
+          <div className="time-row">
+            <div className="form-group">
+              <label>Opening Time</label>
+              <input type="time" name="openingTime" value={formData.openingTime} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Closing Time</label>
+              <input type="time" name="closingTime" value={formData.closingTime} onChange={handleChange} required />
+            </div>
+          </div>
 
-        <textarea
-          name="description"
-          placeholder="Shop Description"
-          value={formData.description}
-          onChange={handleChange}
-        />
+          <div className="form-group">
+            <label>Address</label>
+            <input type="text" name="address" value={formData.address} onChange={handleChange} required />
+          </div>
 
-        <div className="time-row">
-          <input
-            type="time"
-            name="openingTime"
-            value={formData.openingTime}
-            onChange={handleChange}
-            required
-          />
+          <div className="row">
+            <div className="form-group">
+              <label>Pincode</label>
+              <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} required />
+              {loadingPincode && <small>Fetching city/state...</small>}
+            </div>
 
-          <input
-            type="time"
-            name="closingTime"
-            value={formData.closingTime}
-            onChange={handleChange}
-            required
-          />
+            <div className="form-group">
+              <label>City</label>
+              <input type="text" value={formData.city} readOnly />
+            </div>
+
+            <div className="form-group">
+              <label>State</label>
+              <input type="text" value={formData.state} readOnly />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="form-group">
+              <label>Latitude</label>
+              <input type="text" value={formData.latitude} readOnly />
+            </div>
+
+            <div className="form-group">
+              <label>Longitude</label>
+              <input type="text" value={formData.longitude} readOnly />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <button type="button" onClick={handleOpenMap} className="map-button">
+              📍 Select Shop Location on Map
+            </button>
+          </div>
+
+          <div className="form-group">
+            <label>Category</label>
+            <select name="categoryId" value={formData.categoryId} onChange={handleChange} onClick={handleGetCategories} required>
+              <option value="">Select Category</option>
+              {categories.map((item)=>{
+                return <option value={item}>{item}</option>
+              })}
+              
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Shop Logo</label>
+            <input type="file" name="logo" accept="image/*" onChange={handleChange} />
+          </div>
+
+          <button type="submit">Register Shop</button>
+
+        </form>
+      </div>
+
+      {showMap && (
+        <div className="map-modal">
+          <div className="map-container">
+            <div className="map-header">
+              <h3>Select Shop Location</h3>
+              <button onClick={() => setShowMap(false)}>Close ✖</button>
+            </div>
+
+            <MapContainer
+              center={markerPosition || indiaCenter}
+              zoom={markerPosition ? 15 : 5}
+              style={{ width: "100%", height: "400px" }}
+            >
+              <ChangeMapView
+                center={markerPosition || indiaCenter}
+                zoom={markerPosition ? 15 : 5}
+              />
+
+              <TileLayer
+                attribution="© OpenStreetMap contributors"
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+
+              <SearchControl />
+              <LocationSelector />
+            </MapContainer>
+
+          </div>
         </div>
-
-        <input
-          type="text"
-          name="address"
-          placeholder="Address"
-          value={formData.address}
-          onChange={handleChange}
-          required
-        />
-
-        <div className="row">
-          <input
-            type="text"
-            name="city"
-            placeholder="City"
-            value={formData.city}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="text"
-            name="state"
-            placeholder="State"
-            value={formData.state}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="text"
-            name="pincode"
-            placeholder="Pincode"
-            value={formData.pincode}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="row">
-          <input
-            type="text"
-            name="latitude"
-            placeholder="Latitude"
-            value={formData.latitude}
-            onChange={handleChange}
-          />
-
-          <input
-            type="text"
-            name="longitude"
-            placeholder="Longitude"
-            value={formData.longitude}
-            onChange={handleChange}
-          />
-        </div>
-
-        <select
-          name="categoryId"
-          value={formData.categoryId}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select Category</option>
-          <option value="1">Grocery</option>
-          <option value="2">Medical</option>
-          <option value="3">Electronics</option>
-        </select>
-
-        <input
-          type="file"
-          name="logo"
-          accept="image/*"
-          onChange={handleChange}
-        />
-
-        <button type="submit">Register Shop</button>
-
-      </form>
-    </div>
+      )}
     </>
   );
 };

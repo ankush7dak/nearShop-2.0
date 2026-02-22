@@ -5,6 +5,7 @@ import { HOME_BY_ROLE } from "../../constants/HomeByRole";
 import { jwtDecode } from "jwt-decode";
 import { accessToken } from "../../constants/constant";
 import { AuthContext } from "../../contexts/authcontext/AuthProvider";
+import Logout from "../LoginSignup/Logout";
 
 const HamburgerMenu = () => {
   const [open, setOpen] = useState(false);
@@ -67,7 +68,7 @@ const HamburgerMenu = () => {
         {<ul>
           {menuItems[role].map((item) => (
             <li key={item.name} onClick={() => setOpen(false)}>
-              {(item.name == 'Logout')?<Link to={item.path} >{item.name}</Link>:<Link to={item.path}>{item.name}</Link>}
+              {(item.name == 'Logout')?<Logout></Logout>:<Link to={item.path}>{item.name}</Link>}
             </li>
           ))}
         </ul>}

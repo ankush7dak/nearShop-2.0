@@ -1,23 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 import { HOME_BY_ROLE } from "../../constants/HomeByRole";
 import { LINKS } from "../../constants/LinksUtility";
 import "./LoginSignup.css";
 import Loader from "../../Loader/Loader";
-import { accessToken } from "../../constants/constant";
-import { AuthProvider } from "../../contexts/authcontext/AuthProvider";
-import { useContext } from "react";
 import { AuthContext } from "../../contexts/authcontext/AuthProvider";
-import { useEffect } from "react";
 
 const Login = () => {
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
+  const [loginRole, setLoginRole] = useState("customer"); // default role
   const [error, setError] = useState("");
   const [loader, setLoader] = useState(false);
-  const {user,setUser} = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
 
@@ -28,29 +24,33 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-    `${LINKS.API_BASE_URL}/auth/login`,
-    { mobile, password },
-    { withCredentials: true }
-  );
+        `${LINKS.API_BASE_URL}/auth/login`,
+        { mobile, password, loginRole }, // send role to backend
+        { withCredentials: true }
+      );
+      console.log(res.data);
+      if (res.data === "Login Successful") {
+        const res2 = await axios.get(
+          `${LINKS.API_BASE_URL}/auth/getUserRole`,
+          { withCredentials: true }
+        );
+        const registered = await axios.get(
+          `${LINKS.API_BASE_URL}/shop/isShopRegistered`,
+          { withCredentials: true }
+        );
 
-  if (res.data === "Login Successful") {
-
-    const res2 = await axios.get(
-      `${LINKS.API_BASE_URL}/auth/getUserRole`,
-      { withCredentials: true }
-    );
-
-    setUser(res2.data);
-    console.log(res2.data);
-    navigate(HOME_BY_ROLE[res2.data.toLowerCase()]);
-
-  }
-
+        setUser(res2.data);
+        if(res2.data == 'shopkeeper' && registered.data == 0){
+          navigate('/shopkeeper/registration');
+        }
+        else
+        navigate(HOME_BY_ROLE[res2.data.toLowerCase()]);
+      }
 
       setLoader(false);
-
     } catch (err) {
       setError("Invalid credentials");
+      setLoader(false);
     }
   };
 
@@ -76,7 +76,19 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {loader ? <Loader /> : <button type="submit">Login</button>}
+
+        {/* New Select Input for Role */}
+        <select
+          value={loginRole}
+          onChange={(e) => setLoginRole(e.target.value)}
+          required
+        >
+          <option value="customer">Customer</option>
+          <option value="shopkeeper">Shopkeeper</option>
+          <option value="admin">Admin</option>
+        </select>
+
+        {loader ? <Loader /> : <button type="submit" onClick={handleLogin}>Login</button>}
 
         <p>
           Don't have an account?{" "}

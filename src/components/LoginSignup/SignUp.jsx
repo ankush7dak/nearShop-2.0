@@ -13,7 +13,8 @@ const SignUp = () => {
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("45545");
   const [role, setRole] = useState("customer"); // default role
-  const[password,setPassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [signUpSuccess, setSignupSuccess] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +32,7 @@ const SignUp = () => {
       console.log('sending');
       const res = await axios.post(`${LINKS.API_BASE_URL}/auth/send-otp`, { mobile, role });
       console.log(res.data);
-      if(res.data == "User Already Exists"){
+      if (res.data == "User Already Exists") {
         setError("User Already Exists");
       }
       else setStep(2);
@@ -54,14 +55,11 @@ const SignUp = () => {
     try {
       setLoading(true);
       console.log('verifying' + mobile + " " + otp);
-      const res = await axios.post(`${LINKS.API_BASE_URL}/auth/verify-otp`, { mobile, otp ,password,role });
-      if(res.data == 'Login Successful') navigate('/shopkeeper/dashboard');
-      // localStorage.setItem("role",token.role);
-      // const accountStatus = res.data.accountStatus;
-      // if (accountStatus == 'ACTIVE' && token.role === "customer") navigate("/customer/home");
-      // if (accountStatus == 'ACTIVE' && token.role === "shopkeeper") navigate("/shopkeeper/home");
-      // if(accountStatus == 'PENDING' && token.role === "shopkeeper") navigate ("/shopkeeper/registration");
-      // else navigate("/pending-approval");
+      const res = await axios.post(`${LINKS.API_BASE_URL}/auth/verify-otp`, { mobile, otp, password, role });
+      if (res.data == 'Signup Success') {
+        setSignupSuccess("SignUp Successful!! proceed to login!!");
+      }
+
     } catch (err) {
       setError(err.response?.data?.message || "OTP verification failed");
     } finally {
@@ -91,8 +89,8 @@ const SignUp = () => {
               <label>
                 <input
                   type="radio"
-                  value="CUSTOMER"
-                  checked={role === "CUSTOMER"}
+                  value="customer"
+                  checked={role === "customer"}
                   onChange={(e) => setRole(e.target.value)}
                 />
                 Customer
@@ -101,8 +99,8 @@ const SignUp = () => {
               <label>
                 <input
                   type="radio"
-                  value="SHOPKEEPER"
-                  checked={role === "SHOPKEEPER"}
+                  value="shopkeeper"
+                  checked={role === "shopkeeper"}
                   onChange={(e) => setRole(e.target.value)}
                 />
                 Shopkeeper
@@ -138,22 +136,26 @@ const SignUp = () => {
               maxLength="15"
               required
             />
+            <div className="signup-message">
+              <p className="signup-p">{signUpSuccess}</p>
+            </div>
+            {signUpSuccess =="" && <div className="button-container">
+              <button disabled={loading}>
+                {loading ? "Verifying..." : "Verify & Continue"}
+              </button>
 
-            <button disabled={loading}>
-              {loading ? "Verifying..." : "Verify & Continue"}
-            </button>
-
-            <button
-              type="button"
-              className="link-btn"
-              disabled={loading}
-              onClick={() => {
-                setOtp(""); // reset OTP field
-                sendOtp();
-              }}
-            >
-              Resend OTP
-            </button>
+              <button
+                type="button"
+                className="link-btn"
+                disabled={loading}
+                onClick={() => {
+                  setOtp(""); // reset OTP field
+                  sendOtp();
+                }}
+              >
+                Resend OTP
+              </button>
+            </div>}
           </>
         )}
 
