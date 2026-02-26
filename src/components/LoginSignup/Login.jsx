@@ -35,7 +35,7 @@ const Login = () => {
           { withCredentials: true }
         );
         const registered = await axios.get(
-          `${LINKS.API_BASE_URL}/shop/isShopRegistered`,
+          `${LINKS.API_BASE_URL}/api/shop/isShopRegistered`,
           { withCredentials: true }
         );
 

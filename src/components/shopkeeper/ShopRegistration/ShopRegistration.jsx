@@ -16,6 +16,7 @@ import "leaflet-geosearch/dist/geosearch.css";
 import "./ShopRegistration.css";
 import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
 import { LINKS } from "../../../constants/LinksUtility";
+import { Links } from "react-router-dom";
 
 /* Fix Leaflet marker icon issue */
 delete L.Icon.Default.prototype._getIconUrl;
@@ -58,7 +59,7 @@ const ShopRegistration = () => {
   ============================ */
   const handleGetCategories = async ()=>{
     const response = await axios.get(
-          `${LINKS.API_BASE_URL}/shop/getAllShopCategories`
+          `${LINKS.API_BASE_URL}/api/shop/getAllShopCategories`
         );
         console.log("categories" + response.data);
         setCategories(response.data);
@@ -101,6 +102,7 @@ const ShopRegistration = () => {
 
   const handleChange = async (e) => {
     const { name, value, files } = e.target;
+    console.log(name +value);
 
     if (files) {
       setFormData({ ...formData, [name]: files[0] });
@@ -227,18 +229,27 @@ const ShopRegistration = () => {
       alert("Please select shop location from map");
       return;
     }
-
+    console.log("formdata " + formData);
     const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
-    });
-
+     Object.keys(formData).forEach((key) => {
+    const value = formData[key];
+    if (value !== null && value !== undefined) {
+      data.append(key, value); // FormData handles files automatically
+    }
+  });
+    for (let pair of data.entries()) {
+    console.log(pair[0], pair[1]);
+  }
+alert("Just chill checking here");
     try {
-      await axios.post("http://localhost:8080/api/shops/register", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      alert("Shop Registered Successfully!");
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/registorShop`, data,{
+    withCredentials: true
+  });
+      if(res.data == true){
+      alert("Shop Registered Successfully! click on ok to move to Dashboard");
+      navigator("/shopkeeper/dashboard");
+      }
+      else alert("some issue during registragion");
     } catch (error) {
       console.error(error);
       alert("Registration Failed");
