@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import "./ShopkeeperAddProduct.css";
-import { FaUpload, FaSave, FaTimes } from "react-icons/fa";
+import { FaUpload, FaSave, FaTimes, FaPlus } from "react-icons/fa";
 import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
 import axios from "axios";
+import { LINKS } from "../../../constants/LinksUtility";
+import AddSubCategoryModal from "./AddSubCategoryModal/AddSubCategoryModal";
+
 
 export default function ShopkeeperAddProduct() {
 
@@ -17,14 +20,43 @@ export default function ShopkeeperAddProduct() {
   const [subcategories, setSubcategories] = useState([]);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
+
+  const fetchSubCategories = async () => {
+      try {
+        const response = await axios.get(
+          `${LINKS.API_BASE_URL}/api/shop/getShopSubCategories`,
+          { withCredentials: true }
+        );
+
+        console.log("categories", response.data);
+        setSubcategories(response.data);
+      } catch (e) {
+        console.log("error", e);
+      }
+    };
   // Fetch shop subcategories (based on logged in shopkeeper)
   useEffect(() => {
-    // axios.get("/api/shop-subcategories/my-shop")
-    //   .then(res => setSubcategories(res.data))
-    //   .catch(err => console.error(err));
+
+    fetchSubCategories();
+
   }, []);
 
+  // const handleGetSubCategories = async () =>{
+  //   try{
+  //     const response = await axios.get(
+  //         `${LINKS.API_BASE_URL}/api/shop/getShopSubCategories`,{
+  //   withCredentials: true
+  // }
+  //       );
+  //       console.log("categories" + response.data);
+  //       setSubcategories(response.data);
+  //   }
+  //   catch(e){
+  //     console.log('error');
+  //   }
+  // }
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -76,9 +108,14 @@ export default function ShopkeeperAddProduct() {
 
   return (
     <>
+    {showModal && (
+        <AddSubCategoryModal setShowModal = {setShowModal} refreshSubCategories={fetchSubCategories}></AddSubCategoryModal>
+      )}
+    <div className={showModal ? "blurred" : "" }>
       <ShopkeeperTopNav />
 
       <div className="add-product-page">
+        
         <header className="page-header">
           <h2>➕ Add New Product</h2>
           <p>Create a new product listing for your store</p>
@@ -114,7 +151,10 @@ export default function ShopkeeperAddProduct() {
             </div>
 
             <div>
-              <label>Subcategory *</label>
+              <div className="sub-category-1">
+                <label>Subcategory *</label>
+                <div className="sub-category-2"><button className="btn-add-category" onClick={() => setShowModal(true)} >Add New</button></div>
+              </div>
               <select
                 name="shopSubcategoryId"
                 value={form.shopSubcategoryId}
@@ -123,8 +163,8 @@ export default function ShopkeeperAddProduct() {
               >
                 <option value="">Select Subcategory</option>
                 {subcategories.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.name}
+                  <option key={sub} value={sub}>
+                    {sub}
                   </option>
                 ))}
               </select>
@@ -179,6 +219,8 @@ export default function ShopkeeperAddProduct() {
 
         </form>
       </div>
+    </div>
+      
     </>
   );
 }

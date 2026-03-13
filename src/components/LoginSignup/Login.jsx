@@ -51,6 +51,8 @@ const Login = () => {
     } catch (err) {
       setError("Invalid credentials");
       setLoader(false);
+    }finally{
+      setLoader(false);
     }
   };
 
