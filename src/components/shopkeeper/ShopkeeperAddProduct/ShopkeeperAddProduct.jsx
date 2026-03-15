@@ -11,10 +11,13 @@ export default function ShopkeeperAddProduct() {
 
   const [form, setForm] = useState({
     name: "",
-    shopSubcategoryId: "",
+    shopSubcategoryName: "",
+    description: "",
     price: "",
     stock: "",
+    weight: "",
     isAvailable: true,
+    productImage: null
   });
 
   const [subcategories, setSubcategories] = useState([]);
@@ -24,23 +27,21 @@ export default function ShopkeeperAddProduct() {
 
 
   const fetchSubCategories = async () => {
-      try {
-        const response = await axios.get(
-          `${LINKS.API_BASE_URL}/api/shop/getShopSubCategories`,
-          { withCredentials: true }
-        );
+    try {
+      const response = await axios.get(
+        `${LINKS.API_BASE_URL}/api/shop/getShopSubCategories`,
+        { withCredentials: true }
+      );
 
-        console.log("categories", response.data);
-        setSubcategories(response.data);
-      } catch (e) {
-        console.log("error", e);
-      }
-    };
+      console.log("categories", response.data);
+      setSubcategories(response.data);
+    } catch (e) {
+      console.log("error", e);
+    }
+  };
   // Fetch shop subcategories (based on logged in shopkeeper)
   useEffect(() => {
-
     fetchSubCategories();
-
   }, []);
 
   // const handleGetSubCategories = async () =>{
@@ -64,6 +65,7 @@ export default function ShopkeeperAddProduct() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
   };
 
   const handleImageUpload = (e) => {
@@ -72,6 +74,10 @@ export default function ShopkeeperAddProduct() {
 
     setImage(file);
     setPreview(URL.createObjectURL(file));
+    setForm((prev) => ({
+      ...prev,
+      productImage: file
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -79,148 +85,191 @@ export default function ShopkeeperAddProduct() {
 
     const payload = {
       name: form.name,
-      shopSubcategoryId: form.shopSubcategoryId,
-      price: parseFloat(form.price),
-      stock: parseInt(form.stock),
+      shopSubcategoryName: form.shopSubcategoryName,
+      description: form.description,
+      price: Number(form.price),
+      stock: Number(form.stock),
+      weight: form.weight,
       isAvailable: form.isAvailable,
+      productImage: form.productImage
     };
 
+    const data = new FormData();
+    Object.keys(payload).forEach((key) => {
+      const value = payload[key];
+      if (value !== null && value !== undefined) {
+        data.append(key, value); // FormData handles files automatically
+      }
+    });
+    for (let pair of data.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
     try {
-      await axios.post("/api/products", payload);
-      alert("Product Added Successfully ✅");
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/addProduct`, data,
+        { withCredentials: true,
+          headers: {
+      "Content-Type": "multipart/form-data"
+    }
+         },
+      );
+      alert(res.data);
 
       setForm({
         name: "",
-        shopSubcategoryId: "",
+        shopSubcategoryName: "",
+        description: "",
         price: "",
         stock: "",
+        weight: "",
         isAvailable: true,
+        productImage: null
       });
 
       setImage(null);
       setPreview(null);
 
     } catch (error) {
-      console.error(error);
+      console.log(error);
       alert("Error adding product ❌");
     }
   };
 
   return (
     <>
-    {showModal && (
-        <AddSubCategoryModal setShowModal = {setShowModal} refreshSubCategories={fetchSubCategories}></AddSubCategoryModal>
+      {showModal && (
+        <AddSubCategoryModal setShowModal={setShowModal} refreshSubCategories={fetchSubCategories}></AddSubCategoryModal>
       )}
-    <div className={showModal ? "blurred" : "" }>
-      <ShopkeeperTopNav />
+      <div className={showModal ? "blurred" : ""}>
+        <ShopkeeperTopNav />
 
-      <div className="add-product-page">
-        
-        <header className="page-header">
-          <h2>➕ Add New Product</h2>
-          <p>Create a new product listing for your store</p>
-        </header>
+        <div className="add-product-page">
 
-        <form className="product-form" onSubmit={handleSubmit}>
+          <header className="page-header">
+            <h2>➕ Add New Product</h2>
+            <p>Create a new product listing for your store</p>
+          </header>
 
-          {/* Image Upload (Optional Feature) */}
-          <div className="image-section">
-            <label className="upload-box">
-              {preview ? (
-                <img src={preview} alt="preview" />
-              ) : (
-                <>
-                  <FaUpload />
-                  <span>Upload Product Image</span>
-                </>
-              )}
-              <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
-            </label>
-          </div>
+          <form className="product-form" onSubmit={handleSubmit}>
 
-          <div className="form-grid">
-
-            <div>
-              <label>Product Name *</label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-              />
+            {/* Image Upload (Optional Feature) */}
+            <div className="image-section">
+              <label className="upload-box">
+                {preview ? (
+                  <img src={preview} alt="preview" />
+                ) : (
+                  <>
+                    <FaUpload />
+                    <span>Upload Product Image</span>
+                  </>
+                )}
+                <input type="file" accept="image/*" name="productImage" onChange={handleImageUpload} hidden />
+              </label>
             </div>
 
-            <div>
-              <div className="sub-category-1">
-                <label>Subcategory *</label>
-                <div className="sub-category-2"><button className="btn-add-category" onClick={() => setShowModal(true)} >Add New</button></div>
+            <div className="form-grid">
+
+              <div>
+                <label>Product Name *</label>
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                />
               </div>
-              <select
-                name="shopSubcategoryId"
-                value={form.shopSubcategoryId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Subcategory</option>
-                {subcategories.map((sub) => (
-                  <option key={sub} value={sub}>
-                    {sub}
-                  </option>
-                ))}
-              </select>
+
+              <div>
+                <div className="sub-category-1">
+                  <label>Subcategory *</label>
+                  <div className="sub-category-2"><button className="btn-add-category" onClick={() => setShowModal(true)} >Add New</button></div>
+                </div>
+                <select
+                  name="shopSubcategoryName"
+                  value={form.shopSubcategoryName}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Subcategory</option>
+                  {subcategories.map((sub) => (
+                    <option key={sub} value={sub}>
+                      {sub}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label>Selling Price (₹) *</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={form.price}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label>Stock Quantity *</label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={form.stock}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div>
+                <label>Product Description *</label>
+                <input
+                  type="text"
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div>
+                <label>Weight in gm/kg *</label>
+                <input
+                  type="text"
+                  name="weight"
+                  value={form.weight}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
             </div>
 
-            <div>
-              <label>Selling Price (₹) *</label>
-              <input
-                type="number"
-                name="price"
-                value={form.price}
-                onChange={handleChange}
-                required
-              />
+            <div className="form-footer">
+
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  name="isAvailable"
+                  checked={form.isAvailable}
+                  onChange={handleChange}
+                />
+                Available for Sale
+              </label>
+
+              <div className="btn-group">
+                <button type="reset" className="cancel">
+                  <FaTimes /> Reset
+                </button>
+
+                <button type="submit" className="save">
+                  <FaSave /> Save Product
+                </button>
+              </div>
             </div>
 
-            <div>
-              <label>Stock Quantity *</label>
-              <input
-                type="number"
-                name="stock"
-                value={form.stock}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-          </div>
-
-          <div className="form-footer">
-
-            <label className="toggle">
-              <input
-                type="checkbox"
-                name="isAvailable"
-                checked={form.isAvailable}
-                onChange={handleChange}
-              />
-              Available for Sale
-            </label>
-
-            <div className="btn-group">
-              <button type="reset" className="cancel">
-                <FaTimes /> Reset
-              </button>
-
-              <button type="submit" className="save">
-                <FaSave /> Save Product
-              </button>
-            </div>
-          </div>
-
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
-      
+
     </>
   );
 }
