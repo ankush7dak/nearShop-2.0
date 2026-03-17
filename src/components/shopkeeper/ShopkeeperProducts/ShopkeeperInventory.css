@@ -1,5 +1,22 @@
+/* Root Theme */
+:root {
+  --primary: #2563eb;
+  --primary-light: #eff6ff;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --gray: #6b7280;
+  --border: #e5e7eb;
+  --bg: #f9fafb;
+  --white: #ffffff;
+}
+
+/* Layout */
 .inventory-pro {
-  padding: 20px;
+  padding: 20px 30px;
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
 }
 
 /* Header */
@@ -7,90 +24,218 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 18px;
+}
+
+.inventory-header h2 {
+  font-size: 22px;
+  font-weight: 600;
 }
 
 .bulk-actions {
   display: flex;
+  align-items: center;
   gap: 10px;
+}
+
+.bulk-actions button {
+  background: var(--danger);
+  color: var(--white);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.bulk-actions button:hover {
+  background: #b91c1c;
 }
 
 /* Toolbar */
 .inventory-toolbar {
-  position: sticky;
-  top: 0;
-  background: #f9fafb;
-  padding: 12px;
-  margin: 14px 0;
   display: flex;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 10px;
-  border-radius: 12px;
+  margin-bottom: 20px;
 }
 
+.inventory-toolbar select,
+.inventory-toolbar button,
+.search input {
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.inventory-toolbar select:focus,
+.search input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Search */
 .search {
   display: flex;
   align-items: center;
-  background: white;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+.search input {
+  border: none;
+  outline: none;
+}
+
+/* Export Button */
+.export {
+  background: var(--primary);
+  color: var(--white);
+  border: none;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.export:hover {
+  background: #1d4ed8;
 }
 
 /* Table */
 .table-wrap {
-  overflow-x: auto;
+  background: var(--white);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 14px;
-  overflow: hidden;
+}
+
+thead {
+  background: var(--primary-light);
 }
 
 th,
 td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  font-size: 13px;
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  font-weight: 600;
+  color: #374151;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: 0.2s;
+}
+
+tbody tr:hover {
+  background: #f3f4f6;
+}
+
+/* Product Cell */
+.prod {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+/* Stock Colors */
+.ok {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.low {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.out {
+  color: var(--danger);
+  font-weight: 600;
 }
 
 .out-row {
-  background: #fef2f2;
+  background: #fff1f2;
 }
 
-/* Stock colors */
-.ok { color: #16a34a; }
-.low { color: #f59e0b; }
-.out { color: #dc2626; }
-
-/* Toggle */
+/* Toggle Button */
 .toggle {
   border: none;
-  background: transparent;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.toggle.on {
+  background: #dcfce7;
+  color: var(--success);
+}
+
+.toggle.off {
+  background: #fee2e2;
+  color: var(--danger);
+}
+
+/* Actions */
+.actions button {
+  border: none;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 6px 10px;
+  margin-right: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.actions button:hover {
+  background: var(--primary);
+  color: var(--white);
+}
+
+/* Input in edit mode */
+td input {
+  width: 80px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+/* Checkbox */
+input[type="checkbox"] {
   cursor: pointer;
 }
 
-/* Mobile */
-.mobile-grid {
-  display: none;
-}
-
+/* Responsive */
 @media (max-width: 900px) {
-  .table-wrap {
-    display: none;
+  .inventory-toolbar {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .mobile-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 12px;
+  table {
+    font-size: 12px;
   }
 
-  .mobile-card {
-    background: white;
-    padding: 14px;
-    border-radius: 12px;
+  th,
+  td {
+    padding: 10px;
   }
 }

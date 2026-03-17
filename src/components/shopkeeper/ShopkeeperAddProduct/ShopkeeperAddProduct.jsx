@@ -5,6 +5,7 @@ import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
 import axios from "axios";
 import { LINKS } from "../../../constants/LinksUtility";
 import AddSubCategoryModal from "./AddSubCategoryModal/AddSubCategoryModal";
+import Loading from "../../Loading/Loading";
 
 
 export default function ShopkeeperAddProduct() {
@@ -14,6 +15,7 @@ export default function ShopkeeperAddProduct() {
     shopSubcategoryName: "",
     description: "",
     price: "",
+    cost: "",
     stock: "",
     weight: "",
     isAvailable: true,
@@ -24,6 +26,7 @@ export default function ShopkeeperAddProduct() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
 
   const fetchSubCategories = async () => {
@@ -82,13 +85,18 @@ export default function ShopkeeperAddProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (form.productImage == null) {
+      alert("Please Add Product Image!!");
+      return;
+    }
+    setLoading(true);
     const payload = {
       name: form.name,
       shopSubcategoryName: form.shopSubcategoryName,
       description: form.description,
       price: Number(form.price),
       stock: Number(form.stock),
+      cost: Number(form.cost),
       weight: form.weight,
       isAvailable: form.isAvailable,
       productImage: form.productImage
@@ -107,11 +115,12 @@ export default function ShopkeeperAddProduct() {
 
     try {
       const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/addProduct`, data,
-        { withCredentials: true,
+        {
+          withCredentials: true,
           headers: {
-      "Content-Type": "multipart/form-data"
-    }
-         },
+            "Content-Type": "multipart/form-data"
+          }
+        },
       );
       alert(res.data);
 
@@ -121,6 +130,7 @@ export default function ShopkeeperAddProduct() {
         description: "",
         price: "",
         stock: "",
+        cost : "",
         weight: "",
         isAvailable: true,
         productImage: null
@@ -133,6 +143,7 @@ export default function ShopkeeperAddProduct() {
       console.log(error);
       alert("Error adding product ❌");
     }
+    setLoading(false);
   };
 
   return (
@@ -149,7 +160,9 @@ export default function ShopkeeperAddProduct() {
             <h2>➕ Add New Product</h2>
             <p>Create a new product listing for your store</p>
           </header>
-
+          {loading && (
+            <Loading></Loading>
+          )}
           <form className="product-form" onSubmit={handleSubmit}>
 
             {/* Image Upload (Optional Feature) */}
@@ -209,6 +222,16 @@ export default function ShopkeeperAddProduct() {
                   required
                 />
               </div>
+              <div>
+                <label>Cost Price (₹) *</label>
+                <input
+                  type="number"
+                  name="cost"
+                  value={form.cost}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
               <div>
                 <label>Stock Quantity *</label>
@@ -260,8 +283,8 @@ export default function ShopkeeperAddProduct() {
                   <FaTimes /> Reset
                 </button>
 
-                <button type="submit" className="save">
-                  <FaSave /> Save Product
+                <button type="submit" className="save" disabled={loading}>
+                  {loading ? "Saving..." : <> <FaSave /> Save Product </>}
                 </button>
               </div>
             </div>

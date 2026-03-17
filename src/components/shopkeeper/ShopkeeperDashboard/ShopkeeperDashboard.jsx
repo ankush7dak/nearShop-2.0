@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./ShopkeeperDashboard.css";
 import {
   FaShoppingBag,
@@ -8,8 +8,30 @@ import {
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
+import { LINKS } from "../../../constants/LinksUtility";
+import axios from "axios";
+
 
 export default function ShopkeeperDashboard() {
+const [productCount,setProductCount] = useState(0);
+  const fetchDashboardData = async ()=>{
+    try {
+      const response = await axios.get(
+        `${LINKS.API_BASE_URL}/api/shop/getDashboardData`,
+        { withCredentials: true }
+      );
+
+      console.log("categories", response.data);
+      setProductCount(response.data.productCount);
+
+    } catch (e) {
+      console.log("error", e);
+    }
+  }
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
   return (
     <>
     <ShopkeeperTopNav></ShopkeeperTopNav>
@@ -32,7 +54,7 @@ export default function ShopkeeperDashboard() {
         <StatCard
           icon={<FaShoppingBag />}
           title="Total Products"
-          value="245"
+          value={productCount}
           link="/shopkeeper/inventory"
         />
         <StatCard

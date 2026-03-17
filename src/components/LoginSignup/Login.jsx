@@ -6,6 +6,7 @@ import { LINKS } from "../../constants/LinksUtility";
 import "./LoginSignup.css";
 import Loader from "../../Loader/Loader";
 import { AuthContext } from "../../contexts/authcontext/AuthProvider";
+import Loading from "../Loading/Loading";
 
 const Login = () => {
   const [mobile, setMobile] = useState("");
@@ -14,6 +15,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loader, setLoader] = useState(false);
   const { user, setUser } = useContext(AuthContext);
+  const [loading,setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -21,6 +23,7 @@ const Login = () => {
     e.preventDefault();
     setError("");
     setLoader(true);
+    setLoading(true);
 
     try {
       const res = await axios.post(
@@ -54,10 +57,14 @@ const Login = () => {
     }finally{
       setLoader(false);
     }
+    setLoading(false);
   };
 
   return (
     <div className="auth-container">
+      {loading && (
+            <Loading></Loading>
+          )}
       <form onSubmit={handleLogin} className="auth-form">
         <h2>Login</h2>
 

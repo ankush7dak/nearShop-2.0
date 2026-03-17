@@ -170,6 +170,8 @@
   cursor: pointer;
 }
 
+
+
 /* Mobile */
 @media (max-width: 600px) {
   .form-footer {
