@@ -43,26 +43,26 @@ const ShopRegistration = () => {
     pincode: "",
     latitude: "",
     longitude: "",
-    categoryId: "",
+    categoryName: "",
     logo: null,
   });
 
   const [loadingPincode, setLoadingPincode] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [markerPosition, setMarkerPosition] = useState(null);
-  const [categories,setCategories] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const indiaCenter = [20.5937, 78.9629];
 
   /* ===========================
      Get Current Location
   ============================ */
-  const handleGetCategories = async ()=>{
+  const handleGetCategories = async () => {
     const response = await axios.get(
-          `${LINKS.API_BASE_URL}/api/shop/getAllShopCategories`
-        );
-        console.log("categories" + response.data);
-        setCategories(response.data);
+      `${LINKS.API_BASE_URL}/api/shop/getAllShopCategories`
+    );
+    console.log("categories" + response.data);
+    setCategories(response.data);
   }
   const handleOpenMap = () => {
     setShowMap(true);
@@ -102,7 +102,7 @@ const ShopRegistration = () => {
 
   const handleChange = async (e) => {
     const { name, value, files } = e.target;
-    console.log(name +value);
+    console.log(name + value);
 
     if (files) {
       setFormData({ ...formData, [name]: files[0] });
@@ -231,27 +231,25 @@ const ShopRegistration = () => {
     }
     console.log("formdata " + formData);
     const data = new FormData();
-     Object.keys(formData).forEach((key) => {
-    const value = formData[key];
-    if (value !== null && value !== undefined) {
-      data.append(key, value); // FormData handles files automatically
-    }
-  });
-    for (let pair of data.entries()) {
-    console.log(pair[0], pair[1]);
-  }
-alert("Just chill checking here");
-    try {
-      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/registorShop`, data,{
-    withCredentials: true
-  });
-      if(res.data == true){
-      alert("Shop Registered Successfully! click on ok to move to Dashboard");
-      navigator("/shopkeeper/dashboard");
+    Object.keys(formData).forEach((key) => {
+      const value = formData[key];
+      if (value !== null && value !== undefined) {
+        data.append(key, value); // FormData handles files automatically
       }
-      else alert("some issue during registragion");
+    });
+    for (let pair of data.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+    try {
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/registorShop`, data, {
+        withCredentials: true
+      });
+        if(res.data == true){
+        alert("Shop Registered Successfully! click on ok to move to Dashboard");
+        Navigate("/shopkeeper/dashboard");
+        }
     } catch (error) {
-      console.error(error);
+      console.log(error);
       alert("Registration Failed");
     }
   };
@@ -338,12 +336,12 @@ alert("Just chill checking here");
 
           <div className="form-group">
             <label>Category</label>
-            <select name="categoryId" value={formData.categoryId} onChange={handleChange} onClick={handleGetCategories} required>
+            <select name="categoryName" value={formData.categoryName} onChange={handleChange} onClick={handleGetCategories} required>
               <option value="">Select Category</option>
-              {categories.map((item)=>{
+              {categories.map((item) => {
                 return <option value={item}>{item}</option>
               })}
-              
+
             </select>
           </div>
 

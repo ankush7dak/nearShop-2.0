@@ -7,6 +7,7 @@ import {
   FaEyeSlash,
   FaEye,
   FaBoxes,
+  FaCross
 } from "react-icons/fa";
 import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
 import axios from "axios";
@@ -311,7 +312,7 @@ export default function ShopkeeperInventoryPro() {
                           onChange={e => handleChange("stock", e.target.value)}
                         />
                       ) : (
-                        `₹${i.stock}`
+                        `${i.stock}`
                       )}
                       </span>
                     </td>
@@ -343,7 +344,8 @@ export default function ShopkeeperInventoryPro() {
                       {editId === i.productId ? (
                         <>
                           <button onClick={handleUpdate}>Update</button>
-                          <button onClick={() => setEditId(null)}>Cancel</button>
+                          <div className="cross-btn"><button onClick={() => setEditId(null)}>❌</button></div>
+                          
                         </>
                       ) : (
                         <button onClick={() => handleEdit(i)}>Edit</button>

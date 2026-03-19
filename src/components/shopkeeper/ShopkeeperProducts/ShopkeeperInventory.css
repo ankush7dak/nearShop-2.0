@@ -183,6 +183,10 @@ tbody tr:hover {
   font-size: 14px;
 }
 
+.cross-btn{
+  display: inline-block;
+}
+
 .toggle.on {
   background: #dcfce7;
   color: var(--success);

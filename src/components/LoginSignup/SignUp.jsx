@@ -11,6 +11,10 @@ const SignUp = () => {
 
   const [step, setStep] = useState(1);
   const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+
+
   const [otp, setOtp] = useState("45545");
   const [role, setRole] = useState("customer"); // default role
   const [password, setPassword] = useState("");
@@ -55,7 +59,7 @@ const SignUp = () => {
     try {
       setLoading(true);
       console.log('verifying' + mobile + " " + otp);
-      const res = await axios.post(`${LINKS.API_BASE_URL}/auth/verify-otp`, { mobile, otp, password, role });
+      const res = await axios.post(`${LINKS.API_BASE_URL}/auth/verify-otp`, { name,email,mobile, otp, password, role });
       if (res.data == 'Signup Success') {
         setSignupSuccess("SignUp Successful!! proceed to login!!");
       }
@@ -78,10 +82,33 @@ const SignUp = () => {
         {step === 1 && (
           <>
             <input
+              type="text"
+              placeholder="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+
+            <input
               type="tel"
               placeholder="Mobile Number"
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
+              required
+            />
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <input
+              type="password"
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
 
@@ -128,14 +155,14 @@ const SignUp = () => {
               maxLength="6"
               required
             />
-            <input
+            {/* <input
               type="text"
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               maxLength="15"
               required
-            />
+            /> */}
             <div className="signup-message">
               <p className="signup-p">{signUpSuccess}</p>
             </div>
