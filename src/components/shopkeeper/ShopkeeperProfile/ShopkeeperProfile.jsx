@@ -8,6 +8,7 @@ import {
   FaCreditCard,
   FaLock,
   FaSave,
+  FaEdit,
 } from "react-icons/fa";
 import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
 import axios from "axios";
@@ -31,10 +32,11 @@ export default function ShopkeeperProfile() {
     bank: "",
     account: "",
 
-    deliveryEnabled: true,
-    vacationMode: false,
+
   });
   const [loading,setLoading] = useState(false);
+  const [categories,setCategories] = useState([]);
+  const [disabled,setDisabled] = useState(true);
   const fetchShopProfileData = async () => {
     setLoading(true);
     try {
@@ -43,6 +45,8 @@ export default function ShopkeeperProfile() {
       if (res.data) {
         const userDTO = res.data.userDTO;
         const shopDTO = res.data.shopDTO;
+        const address = shopDTO.address.split('$');
+        console.log('res active' + shopDTO.isActive);
         setProfile({
           ownerName: userDTO.name,
           email: userDTO.email,
@@ -50,17 +54,18 @@ export default function ShopkeeperProfile() {
           shopName: shopDTO.shopName,
           shopCategory: shopDTO.categoryName,
           shopId: shopDTO.id,
-          address: shopDTO.address,
-          city: shopDTO.city,
-          pincode: shopDTO.pincode,
+          address: address[0],
+          city: address[1],
+          pincode: address[3],
           openTime: shopDTO.openingTime,
           closeTime: shopDTO.closingTime,
+          status: shopDTO.status,
+          providesDelivery : shopDTO.providesDelivery,
+          deliveryRange : shopDTO.deliveryRange,
           upi: "",
           bank: "",
           account: "",
-
-          deliveryEnabled: true,
-          vacationMode: false,
+          isActive : shopDTO.isActive
         });
       }
       console.log(res.data);
@@ -69,9 +74,23 @@ export default function ShopkeeperProfile() {
     }
     setLoading(false);
   }
+  
+  const handleEdit = ()=>{
+    setDisabled(false);
+  }
+
+  const handleGetCategories = async () => {
+    const response = await axios.get(
+      `${LINKS.API_BASE_URL}/api/shop/getAllShopCategories`
+    );
+    console.log("categories" + response.data);
+    setCategories(response.data);
+  }
+
 
   useEffect(() => {
     fetchShopProfileData();
+    handleGetCategories();
   }, []);
 
   const handleChange = (e) => {
@@ -83,10 +102,43 @@ export default function ShopkeeperProfile() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("PROFILE UPDATED =>", profile);
-    alert("Profile saved (mock)");
+    setLoading(true);
+    console.log('isactive' + profile.isActive)
+    const userDTO = {
+    name : profile.ownerName,
+    email : profile.email,
+    mobile : profile.mobile,
+    };
+    const shopDTO = {
+        shopName : profile.shopName,
+        email : profile.email,
+        description : profile.description,
+        openingTime : profile.openTime,
+        closingTime : profile.closeTime,
+        address : profile.address + '$' + profile.city+ '$' + profile.state + '$' +  profile.pincode,
+        categoryName : profile.shopCategory,
+        providesDelivery : profile.providesDelivery,
+        deliveryRange : profile.deliveryRange,
+        isActive : profile.isActive
+
+    }
+    try{
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/updateShopProfile` , {userDTO,shopDTO} ,
+      {
+        withCredentials: true
+      }
+    );
+        window.location.reload();
+
+          console.log(res.data);
+    }catch(e){
+      console.log(e);
+    }
+    setDisabled(true);
+    setLoading(false);
+    
   };
 
   return (
@@ -95,7 +147,9 @@ export default function ShopkeeperProfile() {
       <div className="shop-profile-page">
         {loading && (<Loading></Loading>)}
         <h2>🏪 Shopkeeper Profile & Store Settings</h2>
-
+        <button  className="btnp" onClick={handleEdit} >
+              <FaEdit color="blue"/> Edit
+            </button>
         <form onSubmit={handleSubmit}>
 
           {/* Owner Info */}
@@ -112,6 +166,7 @@ export default function ShopkeeperProfile() {
                   value={profile.ownerName}
                   onChange={handleChange}
                   required
+                  disabled = {disabled}
                 />
               </div>
 
@@ -124,6 +179,8 @@ export default function ShopkeeperProfile() {
                   value={profile.email}
                   onChange={handleChange}
                   required
+                  disabled = {disabled}
+
                 />
               </div>
 
@@ -136,6 +193,7 @@ export default function ShopkeeperProfile() {
                   value={profile.phone}
                   onChange={handleChange}
                   required
+                  disabled
                 />
               </div>
 
@@ -155,6 +213,7 @@ export default function ShopkeeperProfile() {
                   name="shopName"
                   value={profile.shopName}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -165,11 +224,11 @@ export default function ShopkeeperProfile() {
                   name="shopCategory"
                   value={profile.shopCategory}
                   onChange={handleChange}
+                  disabled = {disabled}
                 >
-                  <option>Grocery</option>
-                  <option>Medical</option>
-                  <option>Electronics</option>
-                  <option>Cosmetics</option>
+                  {categories.map(category => <option>{category}</option>)}
+                  
+                  
                 </select>
               </div>
 
@@ -199,6 +258,7 @@ export default function ShopkeeperProfile() {
                   name="address"
                   value={profile.address}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -209,6 +269,7 @@ export default function ShopkeeperProfile() {
                   name="city"
                   value={profile.city}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -219,6 +280,7 @@ export default function ShopkeeperProfile() {
                   name="pincode"
                   value={profile.pincode}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -239,6 +301,7 @@ export default function ShopkeeperProfile() {
                   name="openTime"
                   value={profile.openTime}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -250,6 +313,7 @@ export default function ShopkeeperProfile() {
                   name="closeTime"
                   value={profile.closeTime}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -269,6 +333,7 @@ export default function ShopkeeperProfile() {
                   name="upi"
                   value={profile.upi}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -279,6 +344,7 @@ export default function ShopkeeperProfile() {
                   name="bank"
                   value={profile.bank}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -289,6 +355,7 @@ export default function ShopkeeperProfile() {
                   name="account"
                   value={profile.account}
                   onChange={handleChange}
+                  disabled = {disabled}
                 />
               </div>
 
@@ -305,20 +372,24 @@ export default function ShopkeeperProfile() {
                   <div>
                     <input
                       type="checkbox"
-                      name="deliveryEnabled"
-                      checked={profile.deliveryEnabled}
+                      name="providesDelivery"
+                      checked={profile.providesDelivery}
+                      value={profile.providesDelivery}
                       onChange={handleChange}
+                      disabled = {disabled}
                     />
                     Enable Delivery
                   </div>
-                  {profile.deliveryEnabled && (
+                  {profile.providesDelivery && (
                     <div className="label-data">
                       <input
                         type="number"
                         name="deliveryRange"
-                        checked={profile.deliveryRange}
+                        checked={profile.providesDelivery}
+                        value={profile.deliveryRange}
                         onChange={handleChange}
                         placeholder="Enter delivery range in kms"
+                        disabled = {disabled}
                       />
                     </div>
                   )}
@@ -329,9 +400,11 @@ export default function ShopkeeperProfile() {
               <label>
                 <input
                   type="checkbox"
-                  name="vacationMode"
-                  checked={profile.vacationMode}
+                  name="isActive"
+                  checked={profile.isActive}
                   onChange={handleChange}
+                  value={profile.isActive}
+                  disabled = {disabled}
                 />
                 Vacation Mode
               </label>
@@ -339,13 +412,15 @@ export default function ShopkeeperProfile() {
           </section>
 
           {/* Save */}
+          
           <div className="save-row">
-            <button type="submit">
+            <button type="submit" disabled = {disabled} className="btn">
               <FaSave /> Save Changes
             </button>
           </div>
 
         </form>
+        
       </div>
     </>
   );

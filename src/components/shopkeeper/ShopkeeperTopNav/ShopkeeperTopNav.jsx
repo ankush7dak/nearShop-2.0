@@ -8,10 +8,30 @@ import {
 } from "react-icons/fa";
 import "./ShopkeeperTopNav.css";
 import HamburgerMenu from "../../Hamburgers/HamburgerMenu";
+import Logout from "../../LoginSignup/Logout";
+import axios from "axios";
+import { LINKS } from "../../../constants/LinksUtility";
 
 export default function ShopkeeperTopNav() {
   const [profileOpen, setProfileOpen] = useState(false);
+  const [shopopen,setShopopen] = useState(null);
+  const [shopname,setShopname] = useState('');
   const dropdownRef = useRef(null);
+
+  const fetchNavData = async ()=>{
+    const res = await axios.get(`${LINKS.API_BASE_URL}/api/shop/getNavData`,{
+      withCredentials:true
+    }
+    );
+    console.log(res.data);
+    setShopname(res.data.shopName);
+    setShopopen(res.data.isActive);
+
+  }
+
+  useEffect(()=>{
+    fetchNavData();
+  },[]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -31,16 +51,16 @@ export default function ShopkeeperTopNav() {
       <HamburgerMenu></HamburgerMenu>
       <div className="sk-topnav-left">
         <FaStore className="logo-icon" />
-        <h2>NearShop Seller</h2>
+        <h2>{shopname} NearShop</h2>
       </div>
 
       {/* RIGHT */}
+      
       <div className="sk-topnav-right">
 
         {/* SHOP STATUS */}
-        <button className="shop-status-btn open">
-          Open
-        </button>
+        {      !shopopen?  <button className="shop-status-btn open">Open</button>:        <button className="shop-status-btn closed">Closed</button>
+}
 
         {/* NOTIFICATIONS */}
         <Link to="/shopkeeper/notifications" className="icon-btn">
@@ -63,9 +83,7 @@ export default function ShopkeeperTopNav() {
               <Link to="/shopkeeper/shop">Shop Settings</Link>
               <Link to="/shopkeeper/bank">Bank Details</Link>
               <hr />
-              <button className="logout-btn">
-                <FaPowerOff /> Logout
-              </button>
+                 <Logout></Logout>
             </div>
           )}
         </div>

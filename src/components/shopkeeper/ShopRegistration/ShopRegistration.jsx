@@ -64,6 +64,10 @@ const ShopRegistration = () => {
     console.log("categories" + response.data);
     setCategories(response.data);
   }
+
+  useEffect(()=>{
+    handleGetCategories();
+  },[])
   const handleOpenMap = () => {
     setShowMap(true);
 
@@ -336,7 +340,7 @@ const ShopRegistration = () => {
 
           <div className="form-group">
             <label>Category</label>
-            <select name="categoryName" value={formData.categoryName} onChange={handleChange} onClick={handleGetCategories} required>
+            <select name="categoryName" value={formData.categoryName} onChange={handleChange}  required>
               <option value="">Select Category</option>
               {categories.map((item) => {
                 return <option value={item}>{item}</option>

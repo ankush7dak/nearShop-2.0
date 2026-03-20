@@ -120,6 +120,10 @@ input[readonly] {
   box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
 }
 
+.btn{
+  margin: 2px;
+}
+
 .save-row button:active {
   transform: scale(0.98);
 }
