@@ -24,6 +24,7 @@ import ShopkeeperLowStock from './components/shopkeeper/ShopkeeperLowStock/Shopk
 import ShopkeeperAddProduct from './components/shopkeeper/ShopkeeperAddProduct/ShopkeeperAddProduct';
 import ShopkeeperProfile from './components/shopkeeper/ShopkeeperProfile/ShopkeeperProfile';
 import ShopRegistration from './components/shopkeeper/ShopRegistration/ShopRegistration';
+import GetNewRole from './components/LoginSignup/getNewRole/GetNewRole';
 
 
 function App() {
@@ -150,6 +151,8 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/getNewRole" element={<GetNewRole />} />
+
 
 
       </Routes>

@@ -59,7 +59,7 @@ const SignUp = () => {
     try {
       setLoading(true);
       console.log('verifying' + mobile + " " + otp);
-      const res = await axios.post(`${LINKS.API_BASE_URL}/auth/verify-otp`, { name,email,mobile, otp, password, role });
+      const res = await axios.post(`${LINKS.API_BASE_URL}/auth/verify-otp`, { name,email,mobile, otp, password, role ,verifyingforRoleAccess:false});
       if (res.data == 'Signup Success') {
         setSignupSuccess("SignUp Successful!! proceed to login!!");
       }

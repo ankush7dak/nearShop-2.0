@@ -98,7 +98,10 @@ const Login = () => {
         </select>
 
         {loader ? <Loader /> : <button type="submit" onClick={handleLogin}>Login</button>}
-
+          <p>
+          Already have an account!! want to become customer or shopkeeper{" "}
+          <span onClick={() => navigate("/getNewRole")}>Click here</span>
+        </p>
         <p>
           Don't have an account?{" "}
           <span onClick={() => navigate("/signup")}>Signup</span>
