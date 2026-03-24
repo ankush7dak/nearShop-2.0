@@ -22,35 +22,49 @@ export default function ShopkeeperInventoryPro() {
   const [stockFilter, setStockFilter] = useState("ALL");
   const [sort, setSort] = useState("added");
   const [selected, setSelected] = useState([]);
-  const [loading,setLoading] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+
 
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
-
-  const categories = ["ALL", ...new Set(items.map(i => i.subcategoryName).filter(name => name != null)),...new Set(items.map(i => i.shopSubcategoryName).filter(name => name!=null))];
+  const [imageFile, setImageFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState("");
+  const categories = ["ALL", ...new Set(items.map(i => i.subcategoryName).filter(name => name != null)), ...new Set(items.map(i => i.shopSubcategoryName).filter(name => name != null))];
 
   // fetching inventory data here
-  const fetchAllInventoryData = async ()=>{
-    try{
+  const fetchAllInventoryData = async () => {
+    try {
       setLoading(true);
       const res = await axios.get(`${LINKS.API_BASE_URL}/api/shop/getAllInvertoryData`,
-        {withCredentials:true,
+        {
+          withCredentials: true,
           headers: {
-      "Content-Type": "application/json"
-    }
+            "Content-Type": "application/json"
+          }
         });
       console.log(res.data);
       setItems(res.data.productDTOList);
-    }catch(e){
+    } catch (e) {
       console.log(e);
     }
     setLoading(false);
   }
-  useEffect(()=>{
+  useEffect(() => {
     fetchAllInventoryData();
-  },[]);
-  
+  }, []);
+
+
+  const handleImageUpload = (e, productId) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setEditData(prev => ({
+      ...prev,
+      previewUrl: previewUrl
+    }));
+
+  }
 
   const filtered = useMemo(() => {
     let data = [...items];
@@ -61,11 +75,11 @@ export default function ShopkeeperInventoryPro() {
           i.name.toLowerCase().includes(search.toLowerCase())
       );
 
-    
-    if (category !== "ALL"){
+
+    if (category !== "ALL") {
       data = data.filter(i => i.subcategoryName == category ||
-    i.shopSubcategoryName == category);
-      }
+        i.shopSubcategoryName == category);
+    }
 
     if (stockFilter === "LOW")
       data = data.filter(i => i.stock > 0 && i.stock <= 5);
@@ -113,32 +127,44 @@ export default function ShopkeeperInventoryPro() {
         productId: editData.productId,
         name: editData.name,
         price: Number(editData.price),
-        cost:  Number(editData.cost),
+        cost: Number(editData.cost),
         description: editData.description,
-        stock : Number(editData.stock),
+        stock: Number(editData.stock),
         weight: editData.weight,
-        isAvailable: editData.isAvailable
+        isAvailable: editData.isAvailable,
+        productImage: imageFile
       };
-
+      const data = new FormData();
+      Object.keys(payload).forEach((key) => {
+        const value = payload[key];
+        if (value !== null && value !== undefined) {
+          data.append(key, value); // FormData handles files automatically
+        }
+      });
       /* Backend API call */
       console.log("Edit Data " + editData);
       for (let key in editData) {
-  console.log(key, editData[key]);
-}
-      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/updateProduct`, payload,
+        console.log(key, editData[key]);
+      }
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/updateProduct`, data,
         {
           withCredentials: true,
           headers: {
-    "Content-Type": "application/json"          }
+            "Content-Type": "multipart/form-data"
+          }
         },
       );
-      
 
-      setItems(prev =>
-        prev.map(i => (i.productId === editId ? editData : i))
-      );
+
+     setItems(prev =>
+  prev.map(i =>
+    i.productId === editId
+      ? { ...editData, imageLink: res.data.imageLink }
+      : i
+  ));
 
       setEditId(null);
+      setImageFile(null);
 
     } catch (e) {
       console.log("Update failed");
@@ -152,9 +178,9 @@ export default function ShopkeeperInventoryPro() {
       <ShopkeeperTopNav />
 
       <div className="inventory-pro">
-      {loading && (
-            <Loading></Loading>
-          )}
+        {loading && (
+          <Loading></Loading>
+        )}
         <header className="inventory-header">
           <h2>📊 Inventory Control Center</h2>
 
@@ -228,6 +254,7 @@ export default function ShopkeeperInventoryPro() {
                 </th>
 
                 <th>Product</th>
+                <th>Image</th>
                 <th>Category</th>
                 <th>Selling Price</th>
                 <th>Cost Price</th>
@@ -262,12 +289,39 @@ export default function ShopkeeperInventoryPro() {
                       />
                     </td>
 
+
                     <td className="prod">
                       <FaBoxes />
                       <span>{i.name}</span>
                     </td>
+                    <td className="product-image">
+                      <div className="image-container">
+                        {editId == i.productId ? <img src={editData.previewUrl || i.imageLink}
+                          alt="No Image" /> : <img src={i.imageLink}
+                          alt="No Image" />}
+                        
 
-                    <td>{(i.subcategoryName!=null)?i.subcategoryName:i.shopSubcategoryName}</td>
+                        {/* Hidden file input */}
+                        <input
+                          type="file"
+                          id={`fileInput-${i.productId}`}
+                          style={{ display: "none" }}
+                          onChange={(e) => handleImageUpload(e, i.productId)}
+                        />
+
+                        {/* Overlay */}
+                        {editId == i.productId && (<div
+                          className="overlay-text"
+                          onClick={() =>
+                            document.getElementById(`fileInput-${i.productId}`).click()
+                          }
+                        >
+                          Upload New Image
+                        </div>)}
+
+                      </div>
+                    </td>
+                    <td>{(i.subcategoryName != null) ? i.subcategoryName : i.shopSubcategoryName}</td>
 
                     <td>
                       {editId === i.productId ? (
@@ -301,26 +355,27 @@ export default function ShopkeeperInventoryPro() {
                           i.stock === 0
                             ? "out"
                             : i.stock <= 5
-                            ? "low"
-                            : "ok"
+                              ? "low"
+                              : "ok"
                         }
                       >
                         {editId === i.productId ? (
-                        <input
-                          type="number"
-                          value={editData.stock}
-                          onChange={e => handleChange("stock", e.target.value)}
-                        />
-                      ) : (
-                        `${i.stock}`
-                      )}
+                          <input
+                            type="number"
+                            value={editData.stock}
+                            onChange={e => handleChange("stock", e.target.value)}
+                          />
+                        ) : (
+                          `${i.stock}`
+                        )}
                       </span>
                     </td>
 
                     <td>
                       <button
                         className={`toggle ${i.isAvailable ? "on" : "off"}`}
-                        onClick={() => {toggleActive(i.productId);
+                        onClick={() => {
+                          toggleActive(i.productId);
                           i.isAvailable = !i.isAvailable;
                           editData.isAvailable = i.isAvailable;
                         }}
@@ -330,14 +385,14 @@ export default function ShopkeeperInventoryPro() {
                     </td>
 
                     <td>{editId === i.productId ? (
-                        <input
-                          type="text"
-                          value={editData.description}
-                          onChange={e => handleChange("description", e.target.value)}
-                        />
-                      ) : (
-                        `${i.description}`
-                      )}</td>
+                      <input
+                        type="text"
+                        value={editData.description}
+                        onChange={e => handleChange("description", e.target.value)}
+                      />
+                    ) : (
+                      `${i.description}`
+                    )}</td>
 
                     <td className="actions">
 
@@ -345,7 +400,7 @@ export default function ShopkeeperInventoryPro() {
                         <>
                           <button onClick={handleUpdate}>Update</button>
                           <div className="cross-btn"><button onClick={() => setEditId(null)}>❌</button></div>
-                          
+
                         </>
                       ) : (
                         <button onClick={() => handleEdit(i)}>Edit</button>
