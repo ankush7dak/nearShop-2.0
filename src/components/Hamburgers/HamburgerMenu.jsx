@@ -9,7 +9,7 @@ import Logout from "../LoginSignup/Logout";
 
 const HamburgerMenu = () => {
   const [open, setOpen] = useState(false);
-  const {user,setUser} = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const role = user;
   console.log("role check " + role);
   // const role = localStorage.getItem("role") || "customer";
@@ -35,6 +35,7 @@ const HamburgerMenu = () => {
     shopkeeper: [
       { name: "Home", path: HOME_BY_ROLE.shopkeeper },
       { name: "Products", path: "/shopkeeper/inventory" },
+      { name: "My Customers", path:"/shopkeeper/mycustomers" },
       { name: "Orders", path: "/shopkeeper/orders" },
       { name: "Profile", path: "/shopkeeper/profile" },
       { name: "Logout", path: "/login" },
@@ -68,7 +69,7 @@ const HamburgerMenu = () => {
         {<ul>
           {menuItems[role].map((item) => (
             <li key={item.name} onClick={() => setOpen(false)}>
-              {(item.name == 'Logout')?<Logout></Logout>:<Link to={item.path}>{item.name}</Link>}
+              {(item.name == 'Logout') ? <Logout></Logout> : <Link to={item.path}>{item.name}</Link>}
             </li>
           ))}
         </ul>}

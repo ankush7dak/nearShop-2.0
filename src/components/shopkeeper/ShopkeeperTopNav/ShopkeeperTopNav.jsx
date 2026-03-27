@@ -51,7 +51,7 @@ export default function ShopkeeperTopNav() {
       <HamburgerMenu></HamburgerMenu>
       <div className="sk-topnav-left">
         <FaStore className="logo-icon" />
-        <h2>{shopname} NearShop</h2>
+        <h2>{shopname} </h2>
       </div>
 
       {/* RIGHT */}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import "./ShopkeeperInventory.css";
 import {
   FaSearch,
@@ -18,19 +18,23 @@ export default function ShopkeeperInventoryPro() {
 
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("ALL");
+  const [category, setCategory] = useState("");
   const [stockFilter, setStockFilter] = useState("ALL");
   const [sort, setSort] = useState("added");
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [size] = useState(8);
+  const [hasMore, setHasMore] = useState(true);
 
 
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
   const [imageFile, setImageFile] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
-  const categories = ["ALL", ...new Set(items.map(i => i.subcategoryName).filter(name => name != null)), ...new Set(items.map(i => i.shopSubcategoryName).filter(name => name != null))];
-
+  const categories = ["Bakery Items", ...new Set(items.map(i => i.subcategoryName).filter(name => name != null)), ...new Set(items.map(i => i.shopSubcategoryName).filter(name => name != null))];
+  const [filtered, setFiltered] = useState([]);
+  const [subCategories, setSubcategories] = useState([]);
   // fetching inventory data here
   const fetchAllInventoryData = async () => {
     try {
@@ -38,21 +42,78 @@ export default function ShopkeeperInventoryPro() {
       const res = await axios.get(`${LINKS.API_BASE_URL}/api/shop/getAllInvertoryData`,
         {
           withCredentials: true,
+          params: {
+            page,
+            size,
+            search,
+            category
+          },
           headers: {
             "Content-Type": "application/json"
           }
         });
       console.log(res.data);
-      setItems(res.data.productDTOList);
+      const newItems = res.data.productDTOList;
+
+      if (page === 0) {
+        setFiltered(newItems); // ✅ replace on reset
+      } else {
+        setFiltered(prev => [...prev, ...newItems]); // ✅ append
+      }
+      setHasMore(!res.data.isLastPage);
     } catch (e) {
       console.log(e);
     }
     setLoading(false);
   }
+
   useEffect(() => {
     fetchAllInventoryData();
-  }, []);
+  }, [page, search, category]);
 
+  useEffect(() => {
+    setFiltered([]);
+    setPage(0);
+    setHasMore(true);
+  }, [search, category]);
+  const containerRef = useRef();
+
+  useEffect(() => {
+    const div = containerRef.current;
+
+    const handleScroll = () => {
+      if (!div) return;
+      const isBottom =
+        div.scrollTop + div.clientHeight >= div.scrollHeight - 50;
+      console.log(div.scrollTop + div.clientHeight + " " + div.scrollHeight - 50)
+      if (isBottom && hasMore && !loading) {
+        console.log("🔥 Load next page:", page + 1);
+        setPage(prev => prev + 1)
+      }
+    };
+    div.addEventListener("scroll", handleScroll);
+    return () => div.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loading]);
+
+  const fetchAllShopSubCategories = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${LINKS.API_BASE_URL}/api/shop/getShopSubCategories`,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(res.data);
+      setSubcategories(res.data);
+    } catch (e) {
+      console.log(e);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    fetchAllShopSubCategories();
+  }, []);
 
   const handleImageUpload = (e, productId) => {
     const file = e.target.files[0];
@@ -66,37 +127,37 @@ export default function ShopkeeperInventoryPro() {
 
   }
 
-  const filtered = useMemo(() => {
-    let data = [...items];
+  // const filtered = useMemo(() => {
+  //   let data = [...items];
 
-    if (search)
-      data = data.filter(
-        i =>
-          i.name.toLowerCase().includes(search.toLowerCase())
-      );
+  //   if (search)
+  //     data = data.filter(
+  //       i =>
+  //         i.name.toLowerCase().includes(search.toLowerCase())
+  //     );
 
 
-    if (category !== "ALL") {
-      data = data.filter(i => i.subcategoryName == category ||
-        i.shopSubcategoryName == category);
-    }
+  //   if (category !== "ALL") {
+  //     data = data.filter(i => i.subcategoryName == category ||
+  //       i.shopSubcategoryName == category);
+  //   }
 
-    if (stockFilter === "LOW")
-      data = data.filter(i => i.stock > 0 && i.stock <= 5);
+  //   if (stockFilter === "LOW")
+  //     data = data.filter(i => i.stock > 0 && i.stock <= 5);
 
-    if (stockFilter === "OUT")
-      data = data.filter(i => i.stock === 0);
+  //   if (stockFilter === "OUT")
+  //     data = data.filter(i => i.stock === 0);
 
-    if (sort === "price") data.sort((a, b) => b.price - a.price);
-    if (sort === "stock") data.sort((a, b) => b.stock - a.stock);
-    if (sort === "added")
-      data.sort((a, b) => new Date(b.added) - new Date(a.added));
+  //   if (sort === "price") data.sort((a, b) => b.price - a.price);
+  //   if (sort === "stock") data.sort((a, b) => b.stock - a.stock);
+  //   if (sort === "added")
+  //     data.sort((a, b) => new Date(b.added) - new Date(a.added));
 
-    return data;
-  }, [items, search, category, stockFilter, sort]);
+  //   return data;
+  // }, [items, search, category, stockFilter, sort]);
 
   const toggleActive = productId => {
-    setItems(prev =>
+    setFiltered(prev =>
       prev.map(i => (i.productId === productId ? { ...i, isAvailable: !i.isAvailable } : i))
     );
   };
@@ -118,6 +179,33 @@ export default function ShopkeeperInventoryPro() {
       [field]: value
     }));
   };
+
+  // useEffect(() => {
+  //   const div = containerRef.current;
+
+  //   const handleScroll = () => {
+  //     if (
+  //       div.scrollTop + div.clientHeight >= div.scrollHeight - 50 &&
+  //       hasMore &&
+  //       !loading
+  //     ) {
+  //       setPage(prev => prev + 1);
+  //     }
+  //   };
+
+  //   useEffect(() => {
+  //     setItems([]);
+  //     setPage(0);
+  //     setHasMore(true);
+  //   }, [search, category, stockFilter]);
+
+  //   useEffect(() => {
+  //     fetchAllInventoryData();
+  //   }, [page]);
+
+  //   div.addEventListener("scroll", handleScroll);
+  //   return () => div.removeEventListener("scroll", handleScroll);
+  // }, [hasMore, loading]);
 
   const handleUpdate = async () => {
 
@@ -156,12 +244,12 @@ export default function ShopkeeperInventoryPro() {
       );
 
 
-     setItems(prev =>
-  prev.map(i =>
-    i.productId === editId
-      ? { ...editData, imageLink: res.data.imageLink }
-      : i
-  ));
+      setFiltered(prev =>
+        prev.map(i =>
+          i.productId === editId
+            ? { ...editData, imageLink: res.data.imageLink }
+            : i
+        ));
 
       setEditId(null);
       setImageFile(null);
@@ -206,7 +294,8 @@ export default function ShopkeeperInventoryPro() {
           </div>
 
           <select value={category} onChange={e => setCategory(e.target.value)}>
-            {categories.map(c => (
+            <option key={'ALL'}>ALL</option>
+            {subCategories.map(c => (
               <option key={c}>{c}</option>
             ))}
           </select>
@@ -232,7 +321,7 @@ export default function ShopkeeperInventoryPro() {
 
         </div>
 
-        <div className="table-wrap">
+        <div className="table-wrap" ref={containerRef}>
 
           <table>
 
@@ -298,8 +387,8 @@ export default function ShopkeeperInventoryPro() {
                       <div className="image-container">
                         {editId == i.productId ? <img src={editData.previewUrl || i.imageLink}
                           alt="No Image" /> : <img src={i.imageLink}
-                          alt="No Image" />}
-                        
+                            alt="No Image" />}
+
 
                         {/* Hidden file input */}
                         <input
@@ -371,17 +460,31 @@ export default function ShopkeeperInventoryPro() {
                       </span>
                     </td>
 
-                    <td>
+                    <td>{editId == i.productId ? (
                       <button
                         className={`toggle ${i.isAvailable ? "on" : "off"}`}
                         onClick={() => {
-                          toggleActive(i.productId);
-                          i.isAvailable = !i.isAvailable;
+                          const updated = !i.isAvailable;
+
+                          setEditData(prev => ({
+                            ...prev,
+                            isAvailable: updated
+                          }));
+                        }}
+                      >
+                        {i.isAvailable ? <FaEye /> : <FaEyeSlash />}
+                      </button>) : (
+                      <button
+                        className={`toggle ${i.isAvailable ? "on" : "off"}`}
+                        onClick={() => {
+
                           editData.isAvailable = i.isAvailable;
                         }}
                       >
                         {i.isAvailable ? <FaEye /> : <FaEyeSlash />}
-                      </button>
+                      </button>)
+                    }
+
                     </td>
 
                     <td>{editId === i.productId ? (

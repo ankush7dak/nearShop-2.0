@@ -63,7 +63,7 @@ export default function ShopkeeperAddProduct() {
   // }
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
+    
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,

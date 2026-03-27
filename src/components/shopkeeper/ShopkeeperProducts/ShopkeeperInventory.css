@@ -110,10 +110,14 @@
 
 /* Table */
 .table-wrap {
+  height: 500px;              /* better than max-height */
+  overflow-y: auto;           /* enable scroll */
   background: var(--white);
   border-radius: 10px;
-  overflow: hidden;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    scroll-behavior: smooth;
+
+  
 }
 
 table {
