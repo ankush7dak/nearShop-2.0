@@ -19,36 +19,7 @@ export default function NearShopNavBar({
         <div className="nav-brand">NearShop</div>
 
         {/* SEARCH */}
-        <input
-          className="nav-search"
-          placeholder="Search shops..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-
-        {/* CATEGORY */}
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="nav-select"
-        >
-          {categories.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </select>
-
-        {/* DISTANCE */}
-        <select
-          value={distance}
-          onChange={(e) => setDistance(Number(e.target.value))}
-          className="nav-select"
-        >
-          {distances.map((d) => (
-            <option key={d} value={d}>
-              {d} km
-            </option>
-          ))}
-        </select>
+       
       </div>
     </header>
   );
