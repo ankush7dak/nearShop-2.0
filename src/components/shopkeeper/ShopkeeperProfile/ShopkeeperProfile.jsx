@@ -98,7 +98,7 @@ export default function ShopkeeperProfile() {
 
     setProfile((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? !checked : value,
     }));
   };
 
@@ -401,9 +401,9 @@ export default function ShopkeeperProfile() {
                 <input
                   type="checkbox"
                   name="isActive"
-                  checked={profile.isActive}
+                  checked={!profile.isActive}
                   onChange={handleChange}
-                  value={profile.isActive}
+                  value={!profile.isActive}
                   disabled = {disabled}
                 />
                 Vacation Mode

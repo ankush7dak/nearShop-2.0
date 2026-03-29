@@ -2,13 +2,16 @@ import { useState } from "react";
 import axios from "axios";
 import { Links } from "react-router-dom";
 import { LINKS } from "../../../../constants/LinksUtility";
+import Loading from "../../../Loading/Loading";
 
 function AddSubCategoryModal({ setShowModal, refreshSubCategories}) {
 
     const [name, setName] = useState("");
     const [isActive, setIsActive] = useState(true);
+    const [loading,setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
+        setLoading(true);
         e.preventDefault();
 
         const payload = {
@@ -30,6 +33,7 @@ function AddSubCategoryModal({ setShowModal, refreshSubCategories}) {
         } catch (error) {
             console.log(error);
         }
+        setLoading(false);
     };
 
     return (
@@ -38,7 +42,7 @@ function AddSubCategoryModal({ setShowModal, refreshSubCategories}) {
             <div className="modal">
 
                 <h2>Add Subcategory</h2>
-
+                {loading && (<Loading></Loading>)}
                 <form onSubmit={handleSubmit}>
 
                     <input

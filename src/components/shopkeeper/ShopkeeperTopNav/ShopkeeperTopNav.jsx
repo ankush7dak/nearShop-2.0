@@ -59,7 +59,7 @@ export default function ShopkeeperTopNav() {
       <div className="sk-topnav-right">
 
         {/* SHOP STATUS */}
-        {      !shopopen?  <button className="shop-status-btn open">Open</button>:        <button className="shop-status-btn closed">Closed</button>
+        {      shopopen == true ?  <button className="shop-status-btn open">Open</button>:        <button className="shop-status-btn closed">Closed</button>
 }
 
         {/* NOTIFICATIONS */}

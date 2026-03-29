@@ -53,7 +53,7 @@ function FlyToShop({ shop }) {
   const map = useMap();
   useEffect(() => {
     if (shop) {
-      map.flyTo([shop.lat, shop.lng], 16, { duration: 1.2 });
+      map.flyTo([shop.latitude, shop.longitude], 16, { duration: 1.2 });
     }
   }, [shop, map]);
   return null;
@@ -88,7 +88,7 @@ export default function NearShopSearchPage() {
   const [userLocation, setUserLocation] = useState(null);
   const [selectedShop, setSelectedShop] = useState(null);
   const [routeCoords, setRouteCoords] = useState([]);
-  const [shopDistRange, setShopDistRange] = useState(10);
+  const [shopDistRange, setShopDistRange] = useState(500);
   const [shops, setShops] = useState([]);
   const [mapOpen, setMapOpen] = useState(false);
   const [distance, setDistance] = useState(500);
@@ -96,6 +96,13 @@ export default function NearShopSearchPage() {
   const[selectedShopName,setSelectedShopName] = useState("Shop Products");
   const [selectedShopSubCategories,setSelectedShopSubCategories] = useState([]);
   const [productCategory,setProductCategory] = useState("All");
+
+  //shop search
+  const [shopSearch,setShopSearch] = useState("");
+  const [shopCategory,setShopCategory] =useState("");
+  const [shopDistanceRange , setShopDistanceRange] = useState(500);
+  const [shopPage , setShopPage] = useState(0);
+  const [shopSearchSize, setShopSearchSize] = useState(10);
 
   //
   const [products, setProducts] = useState([]);
@@ -125,26 +132,79 @@ export default function NearShopSearchPage() {
   const navigate = useNavigate();
   const { setShopDetails } = useCustomer();
 
+
+    useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) =>
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }),
+      () =>
+        setUserLocation({
+          lat: 22.5892,
+          lng: 88.4215,
+        })
+    );
+  }, []);
+
+  const getCurrentLocation = () => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject("Geolocation not supported");
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          reject(error.message);
+        }
+      );
+    }
+  });
+};
   /* ---------- FETCH SHOPS ---------- */
   const fetchShopData = async () => {
     setLoading(true);
     try {
+          const location = await getCurrentLocation();
+
       const res = await axios.get(
         `${LINKS.API_BASE_URL}/api/customer/getShopData`,
-        { withCredentials: true }
+        { withCredentials: true,
+          params:{
+            shopSearch : shopSearch,
+            shopDistanceRange : Number(shopDistanceRange),
+            shopCategory : (shopCategory == 'All')? "":shopCategory,
+            shopPage : Number(shopPage),
+            shopSize : Number(shopSearchSize),
+            userLatitude : Number(location.lat),
+            userLongitude : Number(location.lng)
+          }
+         }
       );
       console.log(res.data);
-      setShops(Array.isArray(res.data) ? res.data : []);
+      setShops(res.data);
     } catch (e) {
       console.error("Error fetching shops:", e);
       setShops([]);
+    }finally{
+      setLoading(false);
     }
-    setLoading(false);
   };
+
+  useEffect(()=>{
+    fetchShopData();
+  },[shopSearch,shopPage,shopCategory,shopDistanceRange])
 
   /* ---------- FETCH CATEGORIES ---------- */
   const handleGetCategories = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(
         `${LINKS.API_BASE_URL}/api/shop/getAllShopCategories`
       );
@@ -153,6 +213,7 @@ export default function NearShopSearchPage() {
       console.error("Category fetch error:", e);
       setCategories([]);
     }
+    setLoading(false);
   };
 
   const fetchShopProducts = async () => {
@@ -208,54 +269,41 @@ export default function NearShopSearchPage() {
   }, []);
 
   /* ---------- GEO ---------- */
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        setUserLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        }),
-      () =>
-        setUserLocation({
-          lat: 22.5892,
-          lng: 88.4215,
-        })
-    );
-  }, []);
+
 
   /* ---------- FILTER ---------- */
-  const filtered = useMemo(() => {
-    if (!userLocation) return [];
+  // const filtered = useMemo(() => {
+  //   if (!userLocation) return [];
 
-    let list = shops.filter((s) =>
-      s.shopName?.toLowerCase().includes(query.toLowerCase())
-    );
+  //   let list = shops.filter((s) =>
+  //     s.shopName?.toLowerCase().includes(query.toLowerCase())
+  //   );
 
-    if (category !== "All") {
-      list = list.filter((s) => s.categoryName === category);
-    }
+  //   if (category !== "All") {
+  //     list = list.filter((s) => s.categoryName === category);
+  //   }
 
-    return list
-      .map((s) => {
-        const lat = Number(s.latitude);
-        const lng = Number(s.longitude);
+  //   return list
+  //     .map((s) => {
+  //       const lat = Number(s.latitude);
+  //       const lng = Number(s.longitude);
 
-        return {
-          ...s,
-          lat,
-          lng,
-          distance: getDistanceKm(
-            userLocation.lat,
-            userLocation.lng,
-            lat,
-            lng
-          ),
-        };
-      })
-      .filter((s) => !isNaN(s.latitude) && !isNaN(s.longitude))
-      // .filter((s) => s.distance <= shopDistRange)
-      .sort((a, b) => a.distance - b.distance);
-  }, [shops, query, category, userLocation, shopDistRange]);
+  //       return {
+  //         ...s,
+  //         lat,
+  //         lng,
+  //         distance: getDistanceKm(
+  //           userLocation.lat,
+  //           userLocation.lng,
+  //           lat,
+  //           lng
+  //         ),
+  //       };
+  //     })
+  //     .filter((s) => !isNaN(s.latitude) && !isNaN(s.longitude))
+  //     // .filter((s) => s.distance <= shopDistRange)
+  //     .sort((a, b) => a.distance - b.distance);
+  // }, [shops, query, category, userLocation, shopDistRange]);
 
   /* ---------- RESET ROUTE ---------- */
   useEffect(() => {
@@ -265,6 +313,7 @@ export default function NearShopSearchPage() {
 
   /* ---------- ROUTE ---------- */
   const fetchRoute = async (shop) => {
+    setLoading(true);
     if (!userLocation) return;
     setMapOpen(true);
     try {
@@ -284,6 +333,7 @@ export default function NearShopSearchPage() {
     } catch (err) {
       console.error("Route fetch failed:", err);
     }
+    setLoading(false);
   };
 
   /* ---------- NAV ---------- */
@@ -312,14 +362,14 @@ export default function NearShopSearchPage() {
           <input
             className="nav-search"
             placeholder="Search shops..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={shopSearch}
+            onChange={(e) => setShopSearch(e.target.value)}
           />
 
           {/* CATEGORY */}
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={shopCategory}
+            onChange={(e) => setShopCategory(e.target.value)}
             className="nav-select"
           >
             <option key={"All"}>{"All"}</option>
@@ -330,8 +380,8 @@ export default function NearShopSearchPage() {
 
           {/* DISTANCE */}
           <select
-            value={distance}
-            onChange={(e) => setDistance(Number(e.target.value))}
+            value={shopDistanceRange}
+            onChange={(e) => setShopDistanceRange(Number(e.target.value))}
             className="nav-select"
           >
             {shopDistances.map((d) => (
@@ -345,7 +395,7 @@ export default function NearShopSearchPage() {
           {/* LIST */}
           {loading && (<Loading></Loading>)}
           <div className="shop-list">
-            {filtered.map((shop) => (
+            {shops.map((shop) => (
               <div
                 key={shop.id}
                 className={`shop-card-near-shop `}
@@ -449,6 +499,7 @@ export default function NearShopSearchPage() {
           {/* MAP */}
           {mapOpen && (
             <div className="map-wrapper">
+              
               {userLocation && (
                 <MapContainer
                   center={[userLocation.lat, userLocation.lng]}
@@ -464,7 +515,7 @@ export default function NearShopSearchPage() {
                     <Popup>You are here</Popup>
                   </Marker>
 
-                  {filtered.map((shop) => (
+                  {shops.map((shop) => (
                     <Marker key={shop.id} position={[shop.lat, shop.lng]}>
                       <Popup>
                         <strong>{shop.shopName}</strong>
