@@ -117,9 +117,10 @@ padding: 20px;
 /* MAP */
 
 .map-wrapper {
-  height: 75vh;
-  border-radius: 18px;
-  overflow: hidden;
+      height: 60vh;
+    width: 897px;
+    border-radius: 18px;
+    overflow: hidden;
 }
 
 .map {
@@ -148,9 +149,9 @@ padding: 20px;
 }
 
 /* Grid stretch fix */
-.content-grid > .map-wrapper {
+/* .content-grid > .map-wrapper {
   min-height: 75vh;
-}
+} */
 
 /* Mobile fallback */
 @media (max-width: 900px) {

@@ -145,11 +145,12 @@ export default function ShopkeeperProfile() {
     <>
       <ShopkeeperTopNav />
       <div className="shop-profile-page">
-        {loading && (<Loading></Loading>)}
+        
         <h2>🏪 Shopkeeper Profile & Store Settings</h2>
         <button  className="btnp" onClick={handleEdit} >
               <FaEdit color="blue"/> Edit
             </button>
+            {loading && (<Loading></Loading>)}
         <form onSubmit={handleSubmit}>
 
           {/* Owner Info */}

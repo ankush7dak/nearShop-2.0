@@ -93,15 +93,15 @@ export default function NearShopSearchPage() {
   const [mapOpen, setMapOpen] = useState(false);
   const [distance, setDistance] = useState(500);
   const [shopId, setShopId] = useState(null);
-  const[selectedShopName,setSelectedShopName] = useState("Shop Products");
-  const [selectedShopSubCategories,setSelectedShopSubCategories] = useState([]);
-  const [productCategory,setProductCategory] = useState("All");
+  const [selectedShopName, setSelectedShopName] = useState("Shop Products");
+  const [selectedShopSubCategories, setSelectedShopSubCategories] = useState([]);
+  const [productCategory, setProductCategory] = useState("All");
 
   //shop search
-  const [shopSearch,setShopSearch] = useState("");
-  const [shopCategory,setShopCategory] =useState("");
-  const [shopDistanceRange , setShopDistanceRange] = useState(500);
-  const [shopPage , setShopPage] = useState(0);
+  const [shopSearch, setShopSearch] = useState("");
+  const [shopCategory, setShopCategory] = useState("");
+  const [shopDistanceRange, setShopDistanceRange] = useState(500);
+  const [shopPage, setShopPage] = useState(0);
   const [shopSearchSize, setShopSearchSize] = useState(10);
 
   //
@@ -110,30 +110,52 @@ export default function NearShopSearchPage() {
   const [productQuery, setProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const addToCart = (product) => {
-    setCart((prev) => ({
-      ...prev,
-      [product.id]: (prev[product.id] || 0) + 1,
-    }));
+  const addOrDeleteToCart = async (product, cartTask) => {
+    setLoading(true);
+    try {
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/customer/addOrDeleteToCart`,null,
+        {
+          withCredentials: true,
+          params: {
+            shopId: Number(product.shopId),
+            productId: Number(product.productId),
+            productPrice: Number(product.price),
+            cartTask: cartTask
+          }
+        }
+      );
+      handleGetCartData();
+      console.log(res);
+    } catch (e) {
+      console.log(e);
+    }
+    setLoading(false);
   };
 
-  const removeFromCart = (product) => {
-    setCart((prev) => {
-      const updated = { ...prev };
-      if (updated[product.id] > 1) {
-        updated[product.id] -= 1;
-      } else {
-        delete updated[product.id];
-      }
-      return updated;
-    });
-  };
+  const handleGetCartData = async ()=>{
+    try{
+      setLoading(true);
+      const res = await axios.get(`${LINKS.API_BASE_URL}/api/customer/getCartQuantities`,{
+        withCredentials: true,
+        params :{
+          shopId : shopId
+        }
+      });
+      setCart(res.data);
+    }catch(e){
+      console.log(e);
+    }
+    setLoading(false);
+  }
+  useEffect(()=>{
+    handleGetCartData();
+  },[shopId])
 
   const navigate = useNavigate();
   const { setShopDetails } = useCustomer();
 
 
-    useEffect(() => {
+  useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) =>
         setUserLocation({
@@ -149,57 +171,58 @@ export default function NearShopSearchPage() {
   }, []);
 
   const getCurrentLocation = () => {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject("Geolocation not supported");
-    } else {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          reject(error.message);
-        }
-      );
-    }
-  });
-};
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject("Geolocation not supported");
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          (error) => {
+            reject(error.message);
+          }
+        );
+      }
+    });
+  };
   /* ---------- FETCH SHOPS ---------- */
   const fetchShopData = async () => {
     setLoading(true);
     try {
-          const location = await getCurrentLocation();
+      const location = await getCurrentLocation();
 
       const res = await axios.get(
         `${LINKS.API_BASE_URL}/api/customer/getShopData`,
-        { withCredentials: true,
-          params:{
-            shopSearch : shopSearch,
-            shopDistanceRange : Number(shopDistanceRange),
-            shopCategory : (shopCategory == 'All')? "":shopCategory,
-            shopPage : Number(shopPage),
-            shopSize : Number(shopSearchSize),
-            userLatitude : Number(location.lat),
-            userLongitude : Number(location.lng)
+        {
+          withCredentials: true,
+          params: {
+            shopSearch: shopSearch,
+            shopDistanceRange: Number(shopDistanceRange),
+            shopCategory: (shopCategory == 'All') ? "" : shopCategory,
+            shopPage: Number(shopPage),
+            shopSize: Number(shopSearchSize),
+            userLatitude: Number(location.lat),
+            userLongitude: Number(location.lng)
           }
-         }
+        }
       );
       console.log(res.data);
       setShops(res.data);
     } catch (e) {
       console.error("Error fetching shops:", e);
       setShops([]);
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchShopData();
-  },[shopSearch,shopPage,shopCategory,shopDistanceRange])
+  }, [shopSearch, shopPage, shopCategory, shopDistanceRange])
 
   /* ---------- FETCH CATEGORIES ---------- */
   const handleGetCategories = async () => {
@@ -236,32 +259,32 @@ export default function NearShopSearchPage() {
     setLoading(false);
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchShopProducts();
-  },[shopId,productCategory,productQuery])
+  }, [shopId, productCategory, productQuery])
 
-  const fetchSelectedShopCategories = async ()=>{
+  const fetchSelectedShopCategories = async () => {
     try {
       setLoading(true);
-        const categoriesOfShop = await axios.get(`${LINKS.API_BASE_URL}/api/customer/getSelectedShopSubCategories`,{
-        params:{
+      const categoriesOfShop = await axios.get(`${LINKS.API_BASE_URL}/api/customer/getSelectedShopSubCategories`, {
+        params: {
           shopId: shopId
         }
       });
 
       console.log(categoriesOfShop.data);
       setSelectedShopSubCategories(categoriesOfShop.data);
-      }
-      catch(e){
+    }
+    catch (e) {
 
-      }
-      setLoading(false);
+    }
+    setLoading(false);
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchSelectedShopCategories();
-  },[shopId]);
-  
+  }, [shopId]);
+
 
   useEffect(() => {
     fetchShopData();
@@ -317,7 +340,7 @@ export default function NearShopSearchPage() {
     if (!userLocation) return;
     setMapOpen(true);
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${shop.lng},${shop.lat}?overview=full&geometries=geojson`;
+      const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${shop.longitude},${shop.latitude}?overview=full&geometries=geojson`;
 
       const res = await fetch(url);
       const data = await res.json();
@@ -345,17 +368,8 @@ export default function NearShopSearchPage() {
 
   return (
     <>
-      <NearShopNavBar
-        query={query}
-        setQuery={setQuery}
-        category={category}
-        setCategory={setCategory}
-        distance={shopDistRange}
-        setDistance={setShopDistRange}
-        categories={["All", ...categories]}
-        distances={shopDistances}
-      />
-
+      <NearShopNavBar />
+      {loading && (<Loading></Loading>)}
       <div className="nearshop-page">
         <h1 className="page-title">Find Nearby Shops</h1>
         <div className="shop-search">
@@ -393,7 +407,7 @@ export default function NearShopSearchPage() {
         </div>
         <div className="content-grid">
           {/* LIST */}
-          {loading && (<Loading></Loading>)}
+
           <div className="shop-list">
             {shops.map((shop) => (
               <div
@@ -420,8 +434,8 @@ export default function NearShopSearchPage() {
                   </div>
 
                   <p className="distance">
-                    {shop.distance !== undefined
-                      ? `${shop.distance} km away`
+                    {shop.latitude != null
+                      ? `${getDistanceKm(userLocation.lat, userLocation.lng, shop.latitude, shop.longitude)} km away`
                       : "N/A"}
                   </p>
                 </div>
@@ -468,7 +482,7 @@ export default function NearShopSearchPage() {
                 {products.map((product) => (
                   <div key={product.id} className="product-card">
 
-                    <img className="product-image" loading = "lazy" src={`${product.imageLink}`} alt="" />
+                    <img className="product-image" loading="lazy" src={`${product.imageLink}`} alt="" />
 
                     <h4>{product.name}</h4>
                     {/* <p>Category:- {product.shopSubcategoryName !=null? product.shopSubcategoryName:product.subcategoryName}</p> */}
@@ -477,14 +491,14 @@ export default function NearShopSearchPage() {
                     <p>{product.description}</p>
 
                     <div className="cart-controls">
-                      {cart[product.id] ? (
+                      {cart[product.productId] ? (
                         <>
-                          <button onClick={() => removeFromCart(product)}>-</button>
-                          <span>{cart[product.id]}</span>
-                          <button onClick={() => addToCart(product)}>+</button>
+                          <button onClick={() => addOrDeleteToCart(product, 'delete')}>-</button>
+                          <span>{cart[product.productId]}</span>
+                          <button onClick={() => addOrDeleteToCart(product, 'add')}>+</button>
                         </>
                       ) : (
-                        <button onClick={() => addToCart(product)}>
+                        <button onClick={() => addOrDeleteToCart(product, 'add')}>
                           Add to Cart
                         </button>
                       )}
@@ -499,7 +513,9 @@ export default function NearShopSearchPage() {
           {/* MAP */}
           {mapOpen && (
             <div className="map-wrapper">
-              
+              <div className="shop-name">
+                <h2 className="selected-shop-name">{selectedShopName} Location on Map</h2>
+              </div>
               {userLocation && (
                 <MapContainer
                   center={[userLocation.lat, userLocation.lng]}
@@ -516,7 +532,7 @@ export default function NearShopSearchPage() {
                   </Marker>
 
                   {shops.map((shop) => (
-                    <Marker key={shop.id} position={[shop.lat, shop.lng]}>
+                    <Marker key={shop.id} position={[shop.latitude, shop.longitude]}>
                       <Popup>
                         <strong>{shop.shopName}</strong>
                         <br />
@@ -524,7 +540,7 @@ export default function NearShopSearchPage() {
                         <br />
                         ⭐ {shop.rating || "N/A"}
                         <br />
-                        {shop.distance} km away
+                        {getDistanceKm(userLocation.lat, userLocation.lng, shop.latitude, shop.longitude)} km away
                       </Popup>
                     </Marker>
                   ))}

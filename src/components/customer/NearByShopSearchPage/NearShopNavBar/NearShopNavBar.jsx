@@ -1,16 +1,7 @@
 import HamburgerMenu from "../../../Hamburgers/HamburgerMenu";
 import "./NearShopNavBar.css";
 
-export default function NearShopNavBar({
-  query,
-  setQuery,
-  category,
-  setCategory,
-  distance,
-  setDistance,
-  categories,
-  distances,
-}) {
+export default function NearShopNavBar() {
   return (
     <header className="nearshop-navbar">
       <div className="nearshop-nav-inner">
