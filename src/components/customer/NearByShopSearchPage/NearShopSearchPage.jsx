@@ -103,12 +103,31 @@ export default function NearShopSearchPage() {
   const [shopDistanceRange, setShopDistanceRange] = useState(500);
   const [shopPage, setShopPage] = useState(0);
   const [shopSearchSize, setShopSearchSize] = useState(10);
+  const [changeCartForShop,setChangeCartForShop] = useState(false);
 
   //
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
   const [productQuery, setProductQuery] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const deleteCartItems = async (shopId)=>{
+    try{
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/customer/deleteCartItems`,null,
+        {
+          withCredentials: true,
+          params: {
+            shopId: Number(shopId),
+            
+          }
+        }
+      );
+      alert("Cart Cleared!!");
+       handleGetCartData();
+    }catch(e){
+      alert(e);
+    }
+  }
 
   const addOrDeleteToCart = async (product, cartTask) => {
     setLoading(true);
@@ -124,6 +143,12 @@ export default function NearShopSearchPage() {
           }
         }
       );
+      if(res.data == 'clearCart'){
+        const userAccepted = window.confirm("Do you want to delete cart items of another shop as you are selection product from different shop!!");
+        if(userAccepted){
+          deleteCartItems(product.shopId);
+        }
+      }
       handleGetCartData();
       console.log(res);
     } catch (e) {
@@ -291,42 +316,6 @@ export default function NearShopSearchPage() {
     handleGetCategories();
   }, []);
 
-  /* ---------- GEO ---------- */
-
-
-  /* ---------- FILTER ---------- */
-  // const filtered = useMemo(() => {
-  //   if (!userLocation) return [];
-
-  //   let list = shops.filter((s) =>
-  //     s.shopName?.toLowerCase().includes(query.toLowerCase())
-  //   );
-
-  //   if (category !== "All") {
-  //     list = list.filter((s) => s.categoryName === category);
-  //   }
-
-  //   return list
-  //     .map((s) => {
-  //       const lat = Number(s.latitude);
-  //       const lng = Number(s.longitude);
-
-  //       return {
-  //         ...s,
-  //         lat,
-  //         lng,
-  //         distance: getDistanceKm(
-  //           userLocation.lat,
-  //           userLocation.lng,
-  //           lat,
-  //           lng
-  //         ),
-  //       };
-  //     })
-  //     .filter((s) => !isNaN(s.latitude) && !isNaN(s.longitude))
-  //     // .filter((s) => s.distance <= shopDistRange)
-  //     .sort((a, b) => a.distance - b.distance);
-  // }, [shops, query, category, userLocation, shopDistRange]);
 
   /* ---------- RESET ROUTE ---------- */
   useEffect(() => {

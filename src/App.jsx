@@ -86,7 +86,6 @@ function App() {
         />
         <Route path="/customer/cart" element={
           <ProtectedRoute allowedRoles={[Roles.customer]}>
-            <HamburgerMenu></HamburgerMenu>
             <MyCart></MyCart>
           </ProtectedRoute>
         }

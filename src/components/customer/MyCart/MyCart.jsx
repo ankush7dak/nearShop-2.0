@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./MyCart.css";
+import axios from "axios";
+import { LINKS } from "../../../constants/LinksUtility";
+import NearShopNavBar from "../NearByShopSearchPage/NearShopNavBar/NearShopNavBar";
+
 
 /* =============================
    MOCK CART DATA (INDUSTRY STYLE)
@@ -52,38 +56,35 @@ const MyCart = ({ cartItems = mockCartItems }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [cartProducts,setCartProducts] = useState([]);
 
   const DELIVERY_FEE = 30;
+
+  const fetchCartData = async ()=>{
+    try{
+      const res = await axios.get(`${LINKS.API_BASE_URL}/api/customer/getMyCartData`,{
+        withCredentials : true
+      });
+      console.log(res.data);
+      setCartProducts(res.data);
+    }catch(e){
+
+    }
+  }
+
+  useEffect(()=>{
+    fetchCartData();
+  },[]);
 
   /* =============================
       CART ACTIONS
   ============================= */
 
-  const increaseQty = (id) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id &&
-        item.qty < item.stock &&
-        item.qty < item.maxOrderQty
-          ? { ...item, qty: item.qty + 1 }
-          : item
-      )
-    );
-  };
 
-  const decreaseQty = (id) => {
-    setItems((prev) =>
-      prev
-        .map((item) =>
-          item.id === id ? { ...item, qty: item.qty - 1 } : item
-        )
-        .filter((item) => item.qty > 0)
-    );
-  };
 
-  const removeItem = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
+
+
+
 
   /* =============================
       CALCULATIONS
@@ -103,6 +104,9 @@ const MyCart = ({ cartItems = mockCartItems }) => {
   const total = subtotal - discountAmount + DELIVERY_FEE;
 
   return (
+    <>
+    <NearShopNavBar />
+
     <div className="my-cart-container">
       <div className="cart-page">
         {/* =============================
@@ -111,13 +115,13 @@ const MyCart = ({ cartItems = mockCartItems }) => {
         <div className="cart-items">
           <h2>My Cart</h2>
 
-          {items.length === 0 && (
+          {cartProducts.length === 0 && (
             <p className="empty-cart">Your cart is empty</p>
           )}
 
-          {items.map((item) => (
-            <div className="cart-item" key={item.id}>
-              <img src={item.image} alt={item.name} />
+          {cartProducts.map((item) => (
+            <div className="cart-item" key={item.productId}>
+              <img src={item.imageLink} alt={item.name} />
 
               <div className="cart-info">
                 <h4>{item.name}</h4>
@@ -128,9 +132,9 @@ const MyCart = ({ cartItems = mockCartItems }) => {
               </div>
 
               <div className="cart-qty">
-                <button onClick={() => decreaseQty(item.id)}>-</button>
+                <button >-</button>
                 <span>{item.qty}</span>
-                <button onClick={() => increaseQty(item.id)}>+</button>
+                <button >+</button>
               </div>
 
               <div className="cart-total">
@@ -139,7 +143,7 @@ const MyCart = ({ cartItems = mockCartItems }) => {
 
               <button
                 className="remove-btn"
-                onClick={() => removeItem(item.id)}
+                
               >
                 ✕
               </button>
@@ -237,6 +241,8 @@ const MyCart = ({ cartItems = mockCartItems }) => {
         </div>
       )}
     </div>
+    </>
+    
   );
 };
 
