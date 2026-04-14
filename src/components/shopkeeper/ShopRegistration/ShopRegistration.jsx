@@ -16,7 +16,7 @@ import "leaflet-geosearch/dist/geosearch.css";
 import "./ShopRegistration.css";
 import ShopkeeperTopNav from "../ShopkeeperTopNav/ShopkeeperTopNav";
 import { LINKS } from "../../../constants/LinksUtility";
-import { Links } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 /* Fix Leaflet marker icon issue */
 delete L.Icon.Default.prototype._getIconUrl;
@@ -30,6 +30,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const ShopRegistration = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     shopName: "",
     mobile: "",
@@ -248,9 +249,9 @@ const ShopRegistration = () => {
       const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/registorShop`, data, {
         withCredentials: true
       });
-        if(res.data == true){
-        alert("Shop Registered Successfully! click on ok to move to Dashboard");
-        Navigate("/shopkeeper/dashboard");
+        if (res.data === true) {
+          alert("Shop Registered Successfully! click on ok to move to Dashboard");
+          navigate("/shopkeeper/dashboard");
         }
     } catch (error) {
       console.log(error);

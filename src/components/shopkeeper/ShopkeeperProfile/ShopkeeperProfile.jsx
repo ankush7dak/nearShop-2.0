@@ -125,15 +125,11 @@ export default function ShopkeeperProfile() {
 
     }
     try{
-      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/updateShopProfile` , {userDTO,shopDTO} ,
-      {
-        withCredentials: true
-      }
-    );
-        window.location.reload();
-
-          console.log(res.data);
-    }catch(e){
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/shop/updateShopProfile`, { userDTO, shopDTO }, {
+        withCredentials: true,
+      });
+      console.log(res.data);
+    } catch (e) {
       console.log(e);
     }
     setDisabled(true);

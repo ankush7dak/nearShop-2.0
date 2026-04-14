@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -30,7 +30,17 @@ L.Icon.Default.mergeOptions({
 });
 
 /* ---------------- CONSTANTS ---------------- */
+const STORAGE_KEY = "nearShopSearchPageState";
 const shopDistances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100, 200, 400, 500];
+
+const loadSavedState = () => {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+  } catch (e) {
+    console.error("Failed to parse saved NearShopSearchPage state:", e);
+    return {};
+  }
+};
 
 /* ---------------- DISTANCE ---------------- */
 function getDistanceKm(lat1, lon1, lat2, lon2) {
@@ -82,33 +92,35 @@ function FitRouteBounds({ route }) {
 
 /* ---------------- MAIN ---------------- */
 export default function NearShopSearchPage() {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("All");
-  const [categories, setCategories] = useState([]);
-  const [userLocation, setUserLocation] = useState(null);
-  const [selectedShop, setSelectedShop] = useState(null);
-  const [routeCoords, setRouteCoords] = useState([]);
-  const [shopDistRange, setShopDistRange] = useState(500);
-  const [shops, setShops] = useState([]);
-  const [mapOpen, setMapOpen] = useState(false);
-  const [distance, setDistance] = useState(500);
-  const [shopId, setShopId] = useState(null);
-  const [selectedShopName, setSelectedShopName] = useState("Shop Products");
-  const [selectedShopSubCategories, setSelectedShopSubCategories] = useState([]);
-  const [productCategory, setProductCategory] = useState("All");
+  const savedState = loadSavedState();
+
+  const [query, setQuery] = useState(savedState.query || "");
+  const [category, setCategory] = useState(savedState.category || "All");
+  const [categories, setCategories] = useState(savedState.categories || []);
+  const [userLocation, setUserLocation] = useState(savedState.userLocation || null);
+  const [selectedShop, setSelectedShop] = useState(savedState.selectedShop || null);
+  const [routeCoords, setRouteCoords] = useState(savedState.routeCoords || []);
+  const [shopDistRange, setShopDistRange] = useState(savedState.shopDistRange || 500);
+  const [shops, setShops] = useState(savedState.shops || []);
+  const [mapOpen, setMapOpen] = useState(savedState.mapOpen || false);
+  const [distance, setDistance] = useState(savedState.distance || 500);
+  const [shopId, setShopId] = useState(savedState.shopId || null);
+  const [selectedShopName, setSelectedShopName] = useState(savedState.selectedShopName || "Shop Products");
+  const [selectedShopSubCategories, setSelectedShopSubCategories] = useState(savedState.selectedShopSubCategories || []);
+  const [productCategory, setProductCategory] = useState(savedState.productCategory || "All");
 
   //shop search
-  const [shopSearch, setShopSearch] = useState("");
-  const [shopCategory, setShopCategory] = useState("");
-  const [shopDistanceRange, setShopDistanceRange] = useState(500);
-  const [shopPage, setShopPage] = useState(0);
-  const [shopSearchSize, setShopSearchSize] = useState(10);
-  const [changeCartForShop,setChangeCartForShop] = useState(false);
+  const [shopSearch, setShopSearch] = useState(savedState.shopSearch || "");
+  const [shopCategory, setShopCategory] = useState(savedState.shopCategory || "");
+  const [shopDistanceRange, setShopDistanceRange] = useState(savedState.shopDistanceRange || 500);
+  const [shopPage, setShopPage] = useState(savedState.shopPage || 0);
+  const [shopSearchSize, setShopSearchSize] = useState(savedState.shopSearchSize || 10);
+  const [changeCartForShop,setChangeCartForShop] = useState(savedState.changeCartForShop || false);
 
   //
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState({});
-  const [productQuery, setProductQuery] = useState("");
+  const [products, setProducts] = useState(savedState.products || []);
+  const [cart, setCart] = useState(savedState.cart || {});
+  const [productQuery, setProductQuery] = useState(savedState.productQuery || "");
   const [loading, setLoading] = useState(false);
 
   const deleteCartItems = async (shopId)=>{
@@ -181,6 +193,9 @@ export default function NearShopSearchPage() {
 
 
   useEffect(() => {
+    if (savedState.userLocation) {
+      setUserLocation(savedState.userLocation);
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) =>
         setUserLocation({
@@ -316,6 +331,60 @@ export default function NearShopSearchPage() {
     handleGetCategories();
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        query,
+        category,
+        categories,
+        userLocation,
+        selectedShop,
+        routeCoords,
+        shopDistRange,
+        shops,
+        mapOpen,
+        distance,
+        shopId,
+        selectedShopName,
+        selectedShopSubCategories,
+        productCategory,
+        shopSearch,
+        shopCategory,
+        shopDistanceRange,
+        shopPage,
+        shopSearchSize,
+        changeCartForShop,
+        products,
+        cart,
+        productQuery,
+      })
+    );
+  }, [
+    query,
+    category,
+    categories,
+    userLocation,
+    selectedShop,
+    routeCoords,
+    shopDistRange,
+    shops,
+    mapOpen,
+    distance,
+    shopId,
+    selectedShopName,
+    selectedShopSubCategories,
+    productCategory,
+    shopSearch,
+    shopCategory,
+    shopDistanceRange,
+    shopPage,
+    shopSearchSize,
+    changeCartForShop,
+    products,
+    cart,
+    productQuery,
+  ]);
 
   /* ---------- RESET ROUTE ---------- */
   useEffect(() => {

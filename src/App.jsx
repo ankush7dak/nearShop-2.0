@@ -32,7 +32,7 @@ function App() {
   console.log(userRole);
 
   return (
-    <Router>
+    // <Router>
               <CustomerProvider>
       <Routes>
 
@@ -156,7 +156,7 @@ function App() {
 
       </Routes>
       </CustomerProvider>
-    </Router>
+    // </Router>
   );
 }
 

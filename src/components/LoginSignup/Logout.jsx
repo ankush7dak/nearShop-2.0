@@ -1,13 +1,15 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./logout.css"; // import the CSS file
 import { LINKS } from "../../constants/LinksUtility";
 import Loading from "../Loading/Loading";
 
 const Logout = () => {
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const [loader, setLoader] = useState(false);
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
     setLoader(true);
@@ -20,7 +22,7 @@ const Logout = () => {
         { withCredentials: true }
       );
       console.log(res.data);
-      window.location.href = "/login";
+      navigate("/login");
     } catch (err) {
       console.error(err);
       setError("Something went wrong during logout");

@@ -1,62 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import "./MyCart.css";
 import axios from "axios";
 import { LINKS } from "../../../constants/LinksUtility";
 import NearShopNavBar from "../NearByShopSearchPage/NearShopNavBar/NearShopNavBar";
+import Loading from "../../Loading/Loading";
 
 
-/* =============================
-   MOCK CART DATA (INDUSTRY STYLE)
-============================= */
 
-const mockCartItems = [
-  {
-    id: 1,
-    name: "Organic Apples (1kg)",
-    image: "/images/apple.jpg",
-    price: 120,
-    qty: 2,
-    stock: 18,
-    category: "Fruits",
-    sku: "FRU-APL-001",
-    seller: "GreenFresh Store",
-    taxPercent: 5,
-    maxOrderQty: 5,
-  },
-  {
-    id: 2,
-    name: "Fresh Cow Milk 1L",
-    image: "/images/milk.jpg",
-    price: 60,
-    qty: 1,
-    stock: 0, // OUT OF STOCK
-    category: "Dairy",
-    sku: "DAR-MIL-012",
-    seller: "DailyMart",
-    taxPercent: 5,
-    maxOrderQty: 10,
-  },
-  {
-    id: 3,
-    name: "Whole Wheat Bread",
-    image: "/images/bread.jpg",
-    price: 40,
-    qty: 3,
-    stock: 12,
-    category: "Bakery",
-    sku: "BAK-BRD-009",
-    seller: "BakeHouse Corner",
-    taxPercent: 5,
-    maxOrderQty: 6,
-  },
-];
+  
 
-const MyCart = ({ cartItems = mockCartItems }) => {
-  const [items, setItems] = useState(cartItems);
+const MyCart = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
-  const [cartProducts,setCartProducts] = useState([]);
+  const [cartProducts, setCartProducts] = useState([]);
+  const [cart, setCart] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [shopId, setShopId] = useState(0);
 
   const DELIVERY_FEE = 30;
 
@@ -66,9 +26,18 @@ const MyCart = ({ cartItems = mockCartItems }) => {
         withCredentials : true
       });
       console.log(res.data);
-      setCartProducts(res.data);
+      if (res.data.length > 0) {
+        setCartProducts(res.data);
+        setShopId(res.data[0].shopId);
+        handleGetCartData(res.data[0].shopId);
+        console.log("shop id from cart data "+res.data[0].shopId);
+      } else {
+        setCartProducts([]);
+        setShopId(0);
+        
+      }
     }catch(e){
-
+      console.error(e);
     }
   }
 
@@ -76,38 +45,109 @@ const MyCart = ({ cartItems = mockCartItems }) => {
     fetchCartData();
   },[]);
 
-  /* =============================
-      CART ACTIONS
-  ============================= */
+   const handleGetCartData = async (id)=>{
+      try{
+        setLoading(true);
+        const res = await axios.get(`${LINKS.API_BASE_URL}/api/customer/getCartQuantities`,{
+          withCredentials: true,
+          params :{
+            shopId : id
+          }
+        });
+        setCart(res.data);
+        console.log("cart data "+res.data + id);
+      }catch(e){
+        console.log(e);
+      }
+      setLoading(false);
+    }
 
+  const subtotal = useMemo(() => {
+    return cartProducts.reduce(
+      (sum, item) => sum + item.price * (cart[item.productId] || 0),
+      0
+    );
+  }, [cartProducts, cart]);
 
+  const totalItems = useMemo(() => {
+    return cartProducts.reduce((sum, item) => sum + (cart[item.productId] || 0), 0);
+  }, [cartProducts, cart]);
 
+  const discountAmount = subtotal * discount;
+  const total = subtotal - discountAmount + DELIVERY_FEE;
 
+  const deleteCartItems = async (shopId) => {
+    try {
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/customer/deleteCartItems`, null,
+        {
+          withCredentials: true,
+          params: {
+            shopId: Number(shopId),
+          }
+        }
+      );
+      alert("Cart Cleared!!");
+      handleGetCartData(shopId);
+    } catch (e) {
+      alert(e);
+    }
+  };
 
+  const addOrDeleteToCart = async (product, cartTask) => {
+    setLoading(true);
+    try {
+      const res = await axios.post(`${LINKS.API_BASE_URL}/api/customer/addOrDeleteToCart`, null,
+        {
+          withCredentials: true,
+          params: {
+            shopId: Number(product.shopId),
+            productId: Number(product.productId),
+            productPrice: Number(product.price),
+            cartTask: cartTask
+          }
+        }
+      );
+      if (res.data == 'clearCart') {
+        const userAccepted = window.confirm("Do you want to delete cart items of another shop as you are selecting product from different shop!!");
+        if (userAccepted) {
+          deleteCartItems(product.shopId);
+        }
+      } else {
+        handleGetCartData(product.shopId);
+      }
+      setCartProducts(prev => prev.filter(p => p.productId !== product.productId));
+      console.log(res);
+    } catch (e) {
+      console.log(e);
+    }
+    setLoading(false);
+  };
 
-
-  /* =============================
-      CALCULATIONS
-  ============================= */
-
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
+  const removeItem = async (item) => {
+    try {
+      const currentQty = cart[item.productId] || 0;
+      for (let i = 0; i < currentQty; i++) {
+        await addOrDeleteToCart(item, 'delete');
+      }
+      setCartProducts(prev => prev.filter(p => p.productId !== item.productId));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const applyCoupon = () => {
     if (coupon === "NEAR10") setDiscount(0.1);
     else alert("Invalid Coupon");
   };
 
-  const discountAmount = subtotal * discount;
-  const total = subtotal - discountAmount + DELIVERY_FEE;
-
   return (
     <>
     <NearShopNavBar />
 
     <div className="my-cart-container">
+      {loading && (
+        <Loading></Loading>
+      )}
       <div className="cart-page">
         {/* =============================
             CART ITEMS
@@ -121,7 +161,7 @@ const MyCart = ({ cartItems = mockCartItems }) => {
 
           {cartProducts.map((item) => (
             <div className="cart-item" key={item.productId}>
-              <img src={item.imageLink} alt={item.name} />
+              <img src={item.imageLink} alt={item.name} loading="lazy"/>
 
               <div className="cart-info">
                 <h4>{item.name}</h4>
@@ -132,18 +172,21 @@ const MyCart = ({ cartItems = mockCartItems }) => {
               </div>
 
               <div className="cart-qty">
-                <button >-</button>
-                <span>{item.qty}</span>
-                <button >+</button>
+                {cart[item.productId] ? (
+                        <>
+                          <button onClick={() => addOrDeleteToCart(item, 'delete')}>-</button>
+                          <span>{cart[item.productId]}</span>
+                          <button onClick={() => addOrDeleteToCart(item, 'add')}>+</button>
+                        </>):''}
               </div>
 
               <div className="cart-total">
-                ₹{item.price * item.qty}
+                ₹{item.price * (cart[item.productId] || 0)}
               </div>
 
               <button
                 className="remove-btn"
-                
+                onClick={() => removeItem(item)}
               >
                 ✕
               </button>
@@ -192,7 +235,7 @@ const MyCart = ({ cartItems = mockCartItems }) => {
 
           <button
             className="pay-btn"
-            disabled={items.length === 0}
+            disabled={cartProducts.length === 0}
             onClick={() => setShowPayment(true)}
           >
             Proceed to Payment
@@ -220,12 +263,21 @@ const MyCart = ({ cartItems = mockCartItems }) => {
               </label>
             </div>
 
+            <div className="summary-row total" style={{ marginBottom: '18px' }}>
+              <span>{totalItems} items</span>
+              <span>₹{total.toFixed(0)}</span>
+            </div>
+
             <button
               className="confirm-pay"
               onClick={() => {
                 alert("Payment Successful 🎉");
                 setShowPayment(false);
-                setItems([]);
+                setCartProducts([]);
+                setCart({});
+                setCoupon("");
+                setDiscount(0);
+                fetchCartData(); // Refresh cart data
               }}
             >
               Pay ₹{total.toFixed(0)}
