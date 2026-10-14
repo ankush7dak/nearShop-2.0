@@ -1,159 +1,306 @@
-import React, { useMemo, useState } from "react";
+
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import "./MyOrders.css";
 
-const MOCK_ORDERS = [
-  {
-    id: "ORD12345",
-    shop: "Fresh Mart",
-    date: "2026-02-01",
-    status: "Delivered",
-    total: 560,
-    items: ["Milk 1L", "Bread", "Rice"],
-  },
-  {
-    id: "ORD12346",
-    shop: "Veg Bazaar",
-    date: "2026-02-04",
-    status: "Active",
-    total: 230,
-    items: ["Tomato", "Potato"],
-  },
-  {
-    id: "ORD12347",
-    shop: "City Pharmacy",
-    date: "2026-01-28",
-    status: "Cancelled",
-    total: 120,
-    items: ["Paracetamol"],
-  },
-  {
-    id: "ORD12348",
-    shop: "Electro World",
-    date: "2026-02-02",
-    status: "Delivered",
-    total: 3200,
-    items: ["Power Bank", "Charger"],
-  },
-];
-
 export default function MyOrders() {
+  const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("All");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch customer's orders
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await axios.get(
+          "http://localhost:8081/api/orders/my-orders",
+          {
+            withCredentials: true,
+          }
+        );
+
+        setOrders(response.data || []);
+      } catch (err) {
+        console.error("Failed to fetch orders:", err);
+        setError("Unable to load your orders.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   const filteredOrders = useMemo(() => {
-    let data = [...MOCK_ORDERS];
+    let data = [...orders];
 
+    // Status filter
     if (activeTab !== "All") {
-      data = data.filter((o) => o.status === activeTab);
+      data = data.filter((o) => {
+        if (activeTab === "Active") {
+          return ["PLACED", "CONFIRMED", "PROCESSING", "OUT_FOR_DELIVERY"].includes(
+            o.orderStatus
+          );
+        }
+
+        if (activeTab === "Delivered") {
+          return o.orderStatus === "DELIVERED";
+        }
+
+        if (activeTab === "Cancelled") {
+          return o.orderStatus === "CANCELLED";
+        }
+
+        return true;
+      });
     }
 
-    if (search) {
-      data = data.filter(
-        (o) =>
-          o.id.toLowerCase().includes(search.toLowerCase()) ||
-          o.shop.toLowerCase().includes(search.toLowerCase())
+    // Search by order ID, shop name or product name
+    if (search.trim()) {
+      const searchText = search.toLowerCase();
+
+      data = data.filter((o) => {
+        const orderIdMatch = String(o.orderId)
+          .toLowerCase()
+          .includes(searchText);
+
+        const shopMatch = String(o.shopName || "")
+          .toLowerCase()
+          .includes(searchText);
+
+        const productMatch = (o.items || []).some((item) =>
+          String(item.productName || "")
+            .toLowerCase()
+            .includes(searchText)
+        );
+
+        return orderIdMatch || shopMatch || productMatch;
+      });
+    }
+
+    // Sort
+    if (sort === "oldest") {
+      data.sort(
+        (a, b) =>
+          new Date(a.orderDate).getTime() -
+          new Date(b.orderDate).getTime()
+      );
+    } else {
+      data.sort(
+        (a, b) =>
+          new Date(b.orderDate).getTime() -
+          new Date(a.orderDate).getTime()
       );
     }
 
-    if (sort === "oldest") {
-      data.sort((a, b) => new Date(a.date) - new Date(b.date));
-    } else {
-      data.sort((a, b) => new Date(b.date) - new Date(a.date));
-    }
-
     return data;
-  }, [activeTab, search, sort]);
+  }, [orders, activeTab, search, sort]);
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "PLACED":
+        return "Placed";
+      case "CONFIRMED":
+        return "Confirmed";
+      case "PROCESSING":
+        return "Processing";
+      case "OUT_FOR_DELIVERY":
+        return "Out for Delivery";
+      case "DELIVERED":
+        return "Delivered";
+      case "CANCELLED":
+        return "Cancelled";
+      default:
+        return status;
+    }
+  };
+
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "PLACED":
+      case "CONFIRMED":
+      case "PROCESSING":
+      case "OUT_FOR_DELIVERY":
+        return "active";
+
+      case "DELIVERED":
+        return "delivered";
+
+      case "CANCELLED":
+        return "cancelled";
+
+      default:
+        return "";
+    }
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="customer-orders-container">
-        <div className="nearshop-orders-page">
-      <h2 className="page-title">My Orders</h2>
+      <div className="nearshop-orders-page">
+        <h2 className="page-title">My Orders</h2>
 
-      {/* FILTER BAR */}
-      <div className="orders-toolbar">
-        <div className="tabs">
-          {["All", "Active", "Delivered", "Cancelled"].map((t) => (
-            <button
-              key={t}
-              className={activeTab === t ? "tab active" : "tab"}
-              onClick={() => setActiveTab(t)}
+        {/* FILTER BAR */}
+        <div className="orders-toolbar">
+          <div className="tabs">
+            {["All", "Active", "Delivered", "Cancelled"].map((t) => (
+              <button
+                key={t}
+                className={activeTab === t ? "tab active" : "tab"}
+                onClick={() => setActiveTab(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          <div className="filters">
+            <input
+              placeholder="Search orders or products"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
             >
-              {t}
-            </button>
-          ))}
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+            </select>
+          </div>
         </div>
 
-        <div className="filters">
-          <input
-            placeholder="Search orders or shops"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <select value={sort} onChange={(e) => setSort(e.target.value)}>
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-          </select>
-        </div>
-      </div>
-
-      {/* ORDER LIST */}
-      <div className="orders-list">
-        {filteredOrders.length === 0 && (
+        {/* LOADING */}
+        {loading && (
           <div className="empty-orders">
-            <h3>No orders found</h3>
-            <p>Try adjusting filters or search.</p>
+            <h3>Loading orders...</h3>
           </div>
         )}
 
-        {filteredOrders.map((order) => (
-          <div className="order-card" key={order.id}>
-            <div className="order-top">
-              <div>
-                <h4>{order.shop}</h4>
-                <p>Order ID: {order.id}</p>
-                <p className="order-date">{order.date}</p>
-              </div>
-
-              <span
-                className={`status-badge ${order.status.toLowerCase()}`}
-              >
-                {order.status}
-              </span>
-            </div>
-
-            <div className="order-middle">
-              <p>
-                {order.items.join(", ")}
-              </p>
-            </div>
-
-            <div className="order-bottom">
-              <div className="price">₹{order.total}</div>
-
-              <div className="actions">
-                {order.status === "Active" && (
-                  <button className="btn secondary">Track</button>
-                )}
-
-                {order.status === "Delivered" && (
-                  <>
-                    <button className="btn secondary">Invoice</button>
-                    <button className="btn primary">Reorder</button>
-                  </>
-                )}
-
-                {order.status === "Cancelled" && (
-                  <button className="btn secondary">Details</button>
-                )}
-              </div>
-            </div>
+        {/* ERROR */}
+        {!loading && error && (
+          <div className="empty-orders">
+            <h3>{error}</h3>
           </div>
-        ))}
+        )}
+
+        {/* ORDER LIST */}
+        {!loading && !error && (
+          <div className="orders-list">
+            {filteredOrders.length === 0 && (
+              <div className="empty-orders">
+                <h3>No orders found</h3>
+                <p>Try adjusting filters or search.</p>
+              </div>
+            )}
+
+            {filteredOrders.map((order) => (
+              <div className="order-card" key={order.orderId}>
+                {/* TOP */}
+                <div className="order-top">
+                  <div>
+                    <h4>{order.shopName || `Shop #${order.shopId}`}</h4>
+
+                    <p>Shop ID: {order.shopId}</p>
+
+                    <p>Order ID: {order.orderId}</p>
+
+                    <p className="order-date">
+                      {formatDate(order.orderDate)}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`status-badge ${getStatusClass(
+                      order.orderStatus
+                    )}`}
+                  >
+                    {getStatusText(order.orderStatus)}
+                  </span>
+                </div>
+
+                {/* ITEMS */}
+                <div className="order-middle">
+                  {(order.items || []).map((item) => (
+                    <div
+                      className="order-item"
+                      key={item.orderItemId || item.productId}
+                    >
+                      <div>
+                        <strong>{item.productName}</strong>
+
+                        <span>
+                          {" "}
+                          × {item.quantity}
+                        </span>
+                      </div>
+
+                      <div>
+                        ₹{item.itemTotal}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* BOTTOM */}
+                <div className="order-bottom">
+                  <div className="price">
+                    ₹{order.totalAmount}
+                  </div>
+
+                  <div className="actions">
+                    {[
+                      "PLACED",
+                      "CONFIRMED",
+                      "PROCESSING",
+                      "OUT_FOR_DELIVERY",
+                    ].includes(order.orderStatus) && (
+                      <button className="btn secondary">
+                        Track
+                      </button>
+                    )}
+
+                    {order.orderStatus === "DELIVERED" && (
+                      <>
+                        <button className="btn secondary">
+                          Invoice
+                        </button>
+
+                        <button className="btn primary">
+                          Reorder
+                        </button>
+                      </>
+                    )}
+
+                    {order.orderStatus === "CANCELLED" && (
+                      <button className="btn secondary">
+                        Details
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
-    </div>
-    
   );
 }
+```

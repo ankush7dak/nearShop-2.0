@@ -22,24 +22,100 @@ const MyCart = () => {
 
   const fetchCartData = async ()=>{
     try{
+      setLoading(true);
       const res = await axios.get(`${LINKS.API_BASE_URL}/api/customer/getMyCartData`,{
         withCredentials : true
       });
-      console.log(res.data);
       if (res.data.length > 0) {
         setCartProducts(res.data);
         setShopId(res.data[0].shopId);
         handleGetCartData(res.data[0].shopId);
-        console.log("shop id from cart data "+res.data[0].shopId);
       } else {
         setCartProducts([]);
         setShopId(0);
-        
       }
     }catch(e){
       console.error(e);
+    }finally{
+      setLoading(false);
     }
   }
+
+  const placeOrder = async ()=> {
+    try {
+      // Validation
+      if (cartProducts.length === 0) {
+        alert("Your cart is empty. Please add items before placing an order.");
+        return;
+      }
+
+      if (totalItems === 0) {
+        alert("Please select quantities for items in your cart.");
+        return;
+      }
+
+      if (!shopId || shopId === 0) {
+        alert("Error: Shop information is missing. Please refresh and try again.");
+        return;
+      }
+
+      // Build order items array
+      const orderItems = cartProducts
+        .filter(item => cart[item.productId] && cart[item.productId] > 0)
+        .map(item => ({
+          productId: Number(item.productId),
+          productName: item.name,
+          price: Number(item.price),
+          quantity: Number(cart[item.productId]),
+          itemTotal: Number(item.price) * Number(cart[item.productId])
+        }));
+
+      if (orderItems.length === 0) {
+        alert("No items selected for order. Please add items to cart.");
+        return;
+      }
+
+      // Build order object
+      const orderData = {
+        shopId: Number(shopId),
+        items: orderItems,
+        subtotal: Math.round(subtotal),
+        discount: discount,
+        discountAmount: Math.round(discountAmount),
+        deliveryFee: DELIVERY_FEE,
+        totalAmount: Math.round(total),
+        couponCode: coupon || null,
+        totalItems: totalItems,
+        orderDate: new Date().toISOString()
+      };
+
+      // Send order to backend
+      setLoading(true);
+      const response = await axios.post(
+        `${LINKS.API_BASE_URL}/api/customer/placeOrder`,
+        orderData,
+        {
+          withCredentials: true
+        }
+      );
+
+      if (response.data && response.data.orderId) {
+        // Order created successfully - show payment modal
+        setShowPayment(true);
+      } else {
+        alert("Failed to create order. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          "Failed to place order. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }
+
 
   useEffect(()=>{
     fetchCartData();
@@ -54,12 +130,13 @@ const MyCart = () => {
             shopId : id
           }
         });
-        setCart(res.data);
-        console.log("cart data "+res.data + id);
+        setCart(res.data || {});
       }catch(e){
-        console.log(e);
+        console.error("Error fetching cart data:", e);
+        setCart({});
+      }finally{
+        setLoading(false);
       }
-      setLoading(false);
     }
 
   const subtotal = useMemo(() => {
@@ -107,28 +184,29 @@ const MyCart = () => {
           }
         }
       );
-      if (res.data == 'clearCart') {
-        const userAccepted = window.confirm("Do you want to delete cart items of another shop as you are selecting product from different shop!!");
+      if (res.data === 'clearCart') {
+        const userAccepted = window.confirm("Do you want to clear cart items from other shops?");
         if (userAccepted) {
           deleteCartItems(product.shopId);
         }
       } else {
         handleGetCartData(product.shopId);
       }
-      setCartProducts(prev => prev.filter(p => p.productId !== product.productId));
-      console.log(res);
     } catch (e) {
-      console.log(e);
+      console.error("Error updating cart:", e);
+    }finally{
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const removeItem = async (item) => {
     try {
       const currentQty = cart[item.productId] || 0;
-      for (let i = 0; i < currentQty; i++) {
-        await addOrDeleteToCart(item, 'delete');
-      }
+      // Batch delete requests instead of sequential API calls
+      const deletePromises = Array(currentQty).fill(null).map(() =>
+        addOrDeleteToCart(item, 'delete')
+      );
+      await Promise.all(deletePromises);
       setCartProducts(prev => prev.filter(p => p.productId !== item.productId));
     } catch (e) {
       console.error(e);
@@ -236,9 +314,9 @@ const MyCart = () => {
           <button
             className="pay-btn"
             disabled={cartProducts.length === 0}
-            onClick={() => setShowPayment(true)}
+            onClick={() => placeOrder()}
           >
-            Proceed to Payment
+            Place your order
           </button>
         </div>
       </div>
@@ -270,14 +348,46 @@ const MyCart = () => {
 
             <button
               className="confirm-pay"
-              onClick={() => {
-                alert("Payment Successful 🎉");
-                setShowPayment(false);
-                setCartProducts([]);
-                setCart({});
-                setCoupon("");
-                setDiscount(0);
-                fetchCartData(); // Refresh cart data
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  
+                  // Get selected payment method
+                  const paymentMethodElement = document.querySelector('input[name="pay"]:checked');
+                  const paymentMethod = paymentMethodElement?.labels?.[0]?.textContent?.trim() || "UPI";
+
+                  // Call backend to confirm payment
+                  const paymentResponse = await axios.post(
+                    `${LINKS.API_BASE_URL}/api/customer/confirmPayment`,
+                    {
+                      totalAmount: Math.round(total),
+                      paymentMethod: paymentMethod,
+                      orderId: null // Backend will get orderId from session
+                    },
+                    {
+                      withCredentials: true
+                    }
+                  );
+
+                  if (paymentResponse.data && paymentResponse.data.success) {
+                    alert("Payment Successful 🎉");
+                    setShowPayment(false);
+                    setCartProducts([]);
+                    setCart({});
+                    setCoupon("");
+                    setDiscount(0);
+                    setShopId(0);
+                    // Refresh cart data
+                    setTimeout(() => fetchCartData(), 500);
+                  } else {
+                    alert("Payment processing failed. Please try again.");
+                  }
+                } catch (error) {
+                  console.error("Payment error:", error);
+                  alert(error.response?.data?.message || "Payment failed. Please try again.");
+                } finally {
+                  setLoading(false);
+                }
               }}
             >
               Pay ₹{total.toFixed(0)}

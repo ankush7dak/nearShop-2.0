@@ -280,6 +280,7 @@ export default function NearShopSearchPage() {
   };
 
   const fetchShopProducts = async () => {
+    setLoading(true);
     try {
       const res = await axios.get(`${LINKS.API_BASE_URL}/api/customer/getShopProducts`, {
         params: {
